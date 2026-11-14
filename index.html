@@ -35,8 +35,15 @@
                     </div>
                 </div>
                 <div class="menu-item">
+                    <a href="notebooks/index.html" class="menu-link-highlight" title="Interactive Learning Notebooks">
+                        <i data-lucide="graduation-cap" style="width:14px; height:14px; vertical-align: middle; margin-right: 4px;"></i>
+                        Learning Notebooks
+                    </a>
+                </div>
+                <div class="menu-item">
                     <span class="menu-trigger">Help</span>
                     <div class="dropdown-content">
+                        <a href="notebooks/index.html"><i data-lucide="graduation-cap" style="width:12px; height:12px; vertical-align: middle; margin-right: 6px; display: inline-block;"></i>Learning Notebooks</a>
                         <a href="#" id="menuQuickGuide"><i data-lucide="book-open" style="width:12px; height:12px; vertical-align: middle; margin-right: 6px; display: inline-block;"></i>Quick Guide</a>
                         <a href="#" id="menuAbout"><i data-lucide="info" style="width:12px; height:12px; vertical-align: middle; margin-right: 6px; display: inline-block;"></i>About</a>
                     </div>
@@ -113,10 +120,10 @@
             <div class="control-card playback-controls">
                 <h3>Animation Controls</h3>
                 <div class="media-btns">
-                    <button id="playPauseBtn" class="btn btn-primary" title="Animate Isochromats">
+                    <button id="playPauseBtn" class="btn btn-primary" title="Animate Isochromats" aria-label="Play or pause isochromat animation">
                         <i data-lucide="play"></i> Animate
                     </button>
-                    <button id="resetBtn" class="btn" title="Reset Animation">
+                    <button id="resetBtn" class="btn" title="Reset Animation" aria-label="Reset simulation to initial state">
                         <i data-lucide="rotate-ccw"></i> Reset
                     </button>
                 </div>
@@ -124,15 +131,15 @@
                     <label>Playback Speed</label>
                     <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem;">
                         <div class="btn-group speed-group" style="width: 100%;">
-                            <button class="btn speed-btn" data-speed="0.25">0.25x</button>
-                            <button class="btn speed-btn" data-speed="0.5">0.5x</button>
-                            <button class="btn speed-btn active" data-speed="1.0" style="border-color: var(--accent-blue);">1x</button>
-                            <button class="btn speed-btn" data-speed="2.0">2x</button>
-                            <button class="btn speed-btn" data-speed="5.0">5x</button>
-                            <button id="customSpeedBtn" class="btn speed-btn" data-speed="custom">Custom</button>
+                            <button class="btn speed-btn" data-speed="0.25" aria-label="Playback speed 0.25x">0.25x</button>
+                            <button class="btn speed-btn" data-speed="0.5" aria-label="Playback speed 0.5x">0.5x</button>
+                            <button class="btn speed-btn active" data-speed="1.0" aria-label="Playback speed 1x" style="border-color: var(--accent-blue);">1x</button>
+                            <button class="btn speed-btn" data-speed="2.0" aria-label="Playback speed 2x">2x</button>
+                            <button class="btn speed-btn" data-speed="5.0" aria-label="Playback speed 5x">5x</button>
+                            <button id="customSpeedBtn" class="btn speed-btn" data-speed="custom" aria-label="Custom playback speed">Custom</button>
                         </div>
                         <div id="customSpeedInputGroup" style="display: none; align-items: center; gap: 0.5rem;">
-                            <input type="number" id="customSpeedInput" value="1.0" min="0.01" max="10.0" step="0.05" style="flex: 1; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: rgba(10, 13, 20, 0.6); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                            <input type="number" id="customSpeedInput" value="1.0" min="0.01" max="10.0" step="0.05" aria-label="Custom playback speed multiplier" style="flex: 1; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: rgba(10, 13, 20, 0.6); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
                             <span style="font-size: 0.8rem; color: var(--text-secondary);">x speed (0.01x - 10x)</span>
                         </div>
                     </div>
@@ -144,17 +151,17 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
                     <h3 style="border: none; margin: 0; padding: 0;">Active Spins</h3>
                     <div class="btn-group">
-                        <button id="addDefaultSpinBtn" class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Add spin at random position">
+                        <button id="addDefaultSpinBtn" class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Add spin at position" aria-label="Add new isochromat">
                             <i data-lucide="plus" style="width: 12px; height: 12px;"></i> Add
                         </button>
-                        <button id="clearSpinsBtn" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Clear all spins">
+                        <button id="clearSpinsBtn" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Clear all spins" aria-label="Clear all isochromats">
                             <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i> Clear
                         </button>
                     </div>
                 </div>
                 
                 <div class="spin-list-container" style="flex: 1;">
-                    <table class="spin-table">
+                    <table class="spin-table" aria-label="Active isochromats list">
                         <thead>
                             <tr>
                                 <th>Spin</th>
@@ -177,7 +184,7 @@
             <div class="control-card" style="margin-top: 0.25rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
                     <h3 style="border: none; margin: 0; padding: 0;">Physics Verification</h3>
-                    <button id="runTestsBtn" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Run physics tests">
+                    <button id="runTestsBtn" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Run physics tests" aria-label="Run automated physics verification tests">
                         <i data-lucide="play" style="width: 12px; height: 12px;"></i> Run Tests
                     </button>
                 </div>
@@ -231,11 +238,11 @@
                 </div>
                 
                 <!-- Viewport navigation controls (3D symbols to move the plane) -->
-                <div class="viewport-controls">
-                    <button id="btnOrbitLeft" class="viewport-btn" title="Rotate Left"><i data-lucide="rotate-ccw"></i></button>
-                    <button id="btnOrbitRight" class="viewport-btn" title="Rotate Right"><i data-lucide="rotate-cw"></i></button>
-                    <button id="btnOrbitUp" class="viewport-btn" title="Tilt Up"><i data-lucide="arrow-up-right"></i></button>
-                    <button id="btnOrbitDown" class="viewport-btn" title="Tilt Down"><i data-lucide="arrow-down-left"></i></button>
+                <div class="viewport-controls" role="toolbar" aria-label="3D Viewport Controls">
+                    <button id="btnOrbitLeft" class="viewport-btn" title="Rotate Left" aria-label="Rotate camera left"><i data-lucide="rotate-ccw"></i></button>
+                    <button id="btnOrbitRight" class="viewport-btn" title="Rotate Right" aria-label="Rotate camera right"><i data-lucide="rotate-cw"></i></button>
+                    <button id="btnOrbitUp" class="viewport-btn" title="Tilt Up" aria-label="Tilt camera up"><i data-lucide="arrow-up-right"></i></button>
+                    <button id="btnOrbitDown" class="viewport-btn" title="Tilt Down" aria-label="Tilt camera down"><i data-lucide="arrow-down-left"></i></button>
                 </div>
                 
                 <div id="threeCanvasContainer" class="canvas-container"></div>
@@ -244,11 +251,11 @@
                 <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0 1.5rem 0.5rem 1.5rem; width: 100%; box-sizing: border-box; z-index: 10;">
                     <i data-lucide="move" style="width: 14px; height: 14px; color: var(--text-secondary); flex-shrink: 0;"></i>
                     <label for="panViewSlider" style="white-space: nowrap; font-size: 0.725rem; color: var(--text-secondary); user-select: none;">Pan View (X):</label>
-                    <input type="range" id="panViewSlider" min="-5.0" max="5.0" step="0.1" value="0.0" style="flex: 1; height: 4px; accent-color: var(--accent-blue); background: rgba(255,255,255,0.05); border: none; padding: 0;">
+                    <input type="range" id="panViewSlider" min="-5.0" max="5.0" step="0.1" value="0.0" aria-label="Pan camera target along X axis" aria-valuemin="-5.0" aria-valuemax="5.0" aria-valuenow="0.0" style="flex: 1; height: 4px; accent-color: var(--accent-blue); background: rgba(255,255,255,0.05); border: none; padding: 0;">
                 </div>
                 
-                <div class="canvas-instructions">
-                    Click along the X-axis grid (horizontal line) to add a spin. Click a spin sphere to edit/remove it.
+                <div class="canvas-instructions" role="status" aria-live="polite">
+                    <strong>Navigation:</strong> Left-click & drag (or Arrow keys) to rotate view • <strong>Add Spin:</strong> Right-click along X-axis grid (or press Enter) • <strong>Edit:</strong> Left-click a spin sphere
                 </div>
             </section>
 
@@ -256,7 +263,7 @@
     </div>
 
     <!-- Add/Edit Isochromat Dialog -->
-    <dialog id="spinDialog">
+    <dialog id="spinDialog" aria-labelledby="dialogTitle">
         <form method="dialog" id="spinForm">
             <h3 id="dialogTitle" style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Configure Isochromat</h3>
             
@@ -298,12 +305,12 @@
     </dialog>
 
     <!-- Interface Settings Dialog -->
-    <dialog id="interfaceDialog" style="max-width: 320px;">
+    <dialog id="interfaceDialog" aria-labelledby="interfaceTitle" style="max-width: 320px;">
         <form method="dialog" id="interfaceForm">
-            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Interface Configuration</h3>
+            <h3 id="interfaceTitle" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Interface Configuration</h3>
             <div class="form-group" style="margin-bottom: 1rem;">
                 <label for="sphereRadiusSlider">Sphere Size (Radius: <span id="sphereRadiusVal">0.08</span>)</label>
-                <input type="range" id="sphereRadiusSlider" min="0.02" max="0.30" step="0.01" value="0.08" style="width: 100%; margin-top: 0.25rem;">
+                <input type="range" id="sphereRadiusSlider" min="0.02" max="0.30" step="0.01" value="0.08" aria-label="Isochromat sphere visual radius" aria-valuemin="0.02" aria-valuemax="0.30" aria-valuenow="0.08" style="width: 100%; margin-top: 0.25rem;">
             </div>
             <div class="actions">
                 <button type="submit" class="btn btn-primary">Close</button>
@@ -312,15 +319,16 @@
     </dialog>
 
     <!-- Quick Guide Dialog -->
-    <dialog id="quickGuideDialog" style="max-width: 450px;">
+    <dialog id="quickGuideDialog" aria-labelledby="quickGuideTitle" style="max-width: 450px;">
         <form method="dialog">
-            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Quick Guide</h3>
+            <h3 id="quickGuideTitle" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Quick Guide</h3>
             <div style="font-size: 0.8rem; line-height: 1.4; display: flex; flex-direction: column; gap: 0.65rem; color: var(--text-secondary); margin-bottom: 1rem;">
-                <p><strong>1. Place Spins:</strong> Click anywhere on the horizontal grid line in the bottom 3D view. A dialog will prompt you to set its $T_1$, $T_2$, Proton Density (PD), and off-resonance $\omega$ properties.</p>
-                <p><strong>2. Edit/Delete:</strong> Click directly on any spin sphere in the 3D view, or click its entry in the sidebar "Active Spins" table.</p>
-                <p><strong>3. Parameters:</strong> Adjust sequence parameters in the sidebar. The plots will recalculate immediately.</p>
-                <p><strong>4. Play Animation:</strong> Click the <strong>Animate</strong> button to watch the spins precess and decay. A vertical cursor displays progress on both signal and sequence charts.</p>
-                <p><strong>5. Verification:</strong> Click <strong>Run Tests</strong> to execute numerical physics checks against theoretical expectations.</p>
+                <p><strong>1. Place Spins:</strong> Right-click anywhere on the horizontal grid line in the bottom 3D view (or click the "+ Add" button in the sidebar). A dialog will prompt you to set its $T_1$, $T_2$, Proton Density (PD), and off-resonance $\omega$ properties.</p>
+                <p><strong>2. Edit/Delete:</strong> Left-click directly on any spin sphere in the 3D view, or click its entry in the sidebar "Active Spins" table.</p>
+                <p><strong>3. Camera Orbit:</strong> Left-click and drag anywhere on the 3D canvas (or use keyboard Arrow keys) to rotate the view without creating accidental spins.</p>
+                <p><strong>4. Parameters:</strong> Adjust sequence parameters in the sidebar. The plots will recalculate immediately.</p>
+                <p><strong>5. Play Animation:</strong> Click the <strong>Animate</strong> button to watch the spins precess and decay. A vertical cursor displays progress on both signal and sequence charts.</p>
+                <p><strong>6. Verification:</strong> Click <strong>Run Tests</strong> to execute numerical physics checks against theoretical expectations.</p>
             </div>
             <div class="actions">
                 <button type="submit" class="btn btn-primary">Got it</button>
@@ -329,9 +337,9 @@
     </dialog>
 
     <!-- About Dialog -->
-    <dialog id="aboutDialog" style="max-width: 380px;">
+    <dialog id="aboutDialog" aria-labelledby="aboutTitle" style="max-width: 380px;">
         <form method="dialog">
-            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">About MRIjs</h3>
+            <h3 id="aboutTitle" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">About MRIjs</h3>
             <div style="font-size: 0.8rem; line-height: 1.4; color: var(--text-secondary); margin-bottom: 1.5rem;">
                 <p style="margin-bottom: 0.5rem;"><strong>Version History:</strong></p>
                 <ul style="list-style: none; padding-left: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem;">
@@ -339,6 +347,7 @@
                     <li>• <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);">v1.1.0:</span> Dynamic scenario constraints and physics verification.</li>
                     <li>• <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);">v1.2.0:</span> Sequence visualizer, interactive zooming, and top dropdown menus.</li>
                     <li>• <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);">v1.3.0:</span> Viewport controls, coordinate axes cues, and pointer hover state feedback.</li>
+                    <li>• <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary);">v1.4.0:</span> Drag-immune camera navigation, right-click placement, keyboard accessibility, and bilingual learning suite.</li>
                 </ul>
             </div>
             <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem; font-size: 0.7rem; color: var(--text-muted); text-align: center; font-style: italic;">

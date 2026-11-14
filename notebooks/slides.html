@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MRIjs Interactive Slides (Reveal.js)</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX CSS & JS for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    
+    <!-- Chart.js & Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="translations.js"></script>
+
+    <!-- Reveal.js CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/black.css">
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.js"></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="notebooks.css">
+    <link rel="stylesheet" href="slides.css">
+</head>
+<body style="overflow:hidden;">
+
+    <!-- Floating Top Toolbar -->
+    <div class="slides-nav-bar">
+        <div class="lang-switcher" role="group" aria-label="Language selection / Selector de idioma" title="Switch Language / Cambiar Idioma" style="margin-right:0.25rem;">
+            <button class="lang-btn active" data-lang="en">EN</button>
+            <button class="lang-btn" data-lang="es">ES</button>
+        </div>
+        <a href="index.html" class="btn-slide-nav" title="Switch to Full Live Computational Paper">
+            <i data-lucide="file-text" style="width:14px;height:14px;"></i> <span data-i18n="btn_live_paper">Live Paper</span>
+        </a>
+        <a href="../index.html" class="btn-slide-nav" title="Return to Main MRI Simulator">
+            <i data-lucide="activity" style="width:14px;height:14px;"></i> <span data-i18n="btn_main_simulator">Main Simulator</span>
+        </a>
+    </div>
+
+    <!-- Reveal.js Container -->
+    <div class="reveal">
+        <div class="slides">
+            
+            <!-- Slide 1: Title -->
+            <section>
+                <span class="slide-badge" data-i18n="slide_badge_suite">MRIjs Educational Suite</span>
+                <h1 data-i18n="paper_title">The Physical Foundations of Magnetic Resonance</h1>
+                <p style="color:#93c5fd;font-size:1.1em;margin-bottom:1.5em;" data-i18n="slide_interactive_pres">An Interactive Computational Presentation</p>
+                <p style="font-size:0.75em;color:#9ca3af;" data-i18n-html="slide_nav_instructions">Use <kbd style="background:#1e293b;padding:2px 6px;border-radius:4px;">Space</kbd> or <kbd style="background:#1e293b;padding:2px 6px;border-radius:4px;">Arrow Keys</kbd> to navigate slides. Every widget on every slide is completely interactive.</p>
+            </section>
+
+            <!-- Slide 2: Outline -->
+            <section>
+                <h2 data-i18n="slide_outline_title">Presentation Outline</h2>
+                <div class="slide-card" style="font-size:0.9em;">
+                    <ul style="line-height:2;padding-left:1.5em;">
+                        <li><span data-i18n-html="slide_outline_m1"><strong>Module 1:</strong> B₀ & Precession (The Larmor Relationship)</span></li>
+                        <li><span data-i18n-html="slide_outline_m2"><strong>Module 2:</strong> Gradients & Spatial Encoding (Phase & Frequency)</span></li>
+                        <li><span data-i18n-html="slide_outline_m3"><strong>Module 3:</strong> RF Pulses & B₁ Magnetic Field (Resonant Nutation)</span></li>
+                        <li><span data-i18n-html="slide_outline_m4"><strong>Module 4:</strong> Image Formation & k-Space (2D Fourier Transform)</span></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- ================== MODULE 1 SLIDES ================== -->
+            <section>
+                <section>
+                    <span class="slide-badge">Module 01</span>
+                    <h2 data-i18n="slide_m1_title">Nuclear Precession & The Larmor Equation</h2>
+                    <div class="slide-card">
+                        <p>Nuclei with non-zero spin have a magnetic moment $\vec{\mu} = \gamma \vec{I}$. In a static field $\vec{B}_0 = B_0 \hat{z}$, torque $\vec{\tau} = \vec{\mu} \times \vec{B}_0$ induces precession:</p>
+                        <div class="slide-math">
+                            $$\omega_0 = \gamma B_0 \quad (\text{rad/s}) \qquad f_0 = \frac{\gamma}{2\pi} B_0 \quad (\text{MHz})$$
+                        </div>
+                        <p style="font-size:0.85em;color:#9ca3af;">For hydrogen protons ($^1\text{H}$), $\frac{\gamma}{2\pi} \approx 42.576\text{ MHz/T}$. Frequency scales linearly with field strength.</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 data-i18n="slide_m1_calc">Interactive Larmor Calculator</h2>
+                    <div class="slide-card">
+                        <div class="slide-controls">
+                            <label style="font-size:0.8em;">$B_0$: <span id="s_m1_b0Val" style="color:#60a5fa;font-family:var(--font-mono);font-weight:700;">1.50 T</span></label>
+                            <input type="range" id="s_m1_b0Slider" min="0.05" max="11.7" step="0.05" value="1.5" style="width:200px;">
+                            <select id="s_m1_nucleusSelect" style="background:#0a0d14;border:1px solid rgba(255,255,255,0.2);color:#fff;padding:4px 8px;border-radius:4px;">
+                                <option value="1H">¹H (42.58 MHz/T)</option>
+                                <option value="19F">¹⁹F (40.05 MHz/T)</option>
+                                <option value="31P">³¹P (17.24 MHz/T)</option>
+                                <option value="23Na">²³Na (11.26 MHz/T)</option>
+                                <option value="13C">¹³C (10.71 MHz/T)</option>
+                            </select>
+                            <button class="nb-btn-reset" onclick="resetModule(1)" style="margin-left:auto;"><i data-lucide="rotate-ccw" style="width:11px;height:11px;"></i> <span data-i18n="btn_reset_baseline">Reset</span></button>
+                        </div>
+                        <div class="slide-metrics">
+                            <div class="slide-metric"><span class="slide-metric-label">Larmor Frequency</span><span id="s_m1_resFreq" class="slide-metric-val">63.864 MHz</span></div>
+                            <div class="slide-metric"><span class="slide-metric-label">Period (T₀)</span><span id="s_m1_resPeriod" class="slide-metric-val">15.66 ns</span></div>
+                            <div class="slide-metric"><span class="slide-metric-label">Water-Fat Shift</span><span id="s_m1_resShift" class="slide-metric-val">223.5 Hz</span></div>
+                            <div class="slide-metric"><span class="slide-metric-label">Thermal Polarization</span><span id="s_m1_resBoltz" class="slide-metric-val">4.8 ppm</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 data-i18n="slide_m1_frame">Laboratory vs. Rotating Frame</h2>
+                    <div class="slide-card">
+                        <div class="slide-controls">
+                            <label style="font-size:0.75em;">Off-Resonance ($\Delta \omega$): <span id="s_m1_dfVal" style="color:#60a5fa;font-family:var(--font-mono);">2.0 Hz</span></label>
+                            <input type="range" id="s_m1_dfSlider" min="-10" max="10" step="0.5" value="2.0" style="width:160px;">
+                            <button id="s_m1_playBtn" class="nb-btn" style="padding:2px 8px;font-size:0.75em;"><i data-lucide="pause" style="width:12px;height:12px;"></i> Pause</button>
+                        </div>
+                        <div class="slide-canvas-box" style="height:220px;">
+                            <canvas id="s_m1_frameCanvas" width="750" height="220" style="width:100%;height:100%;"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 data-i18n="slide_m1_sim">Live Simulation: Chemical Shift Beat Signal</h2>
+                    <div class="slide-card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5em;">
+                            <span style="font-size:0.8em;font-family:var(--font-mono);color:#93c5fd;">BlochSimulator (FID, Water w=0, Fat w=40Hz)</span>
+                            <button id="s_m1_runCodeBtn" class="nb-btn nb-btn-primary" style="padding:3px 8px;font-size:0.75em;"><i data-lucide="play" style="width:12px;height:12px;"></i> <span data-i18n="btn_run_sim">Run with MRIjs</span></button>
+                        </div>
+                        <div id="s_m1_codeOutput" style="height:200px;position:relative;">
+                            <canvas id="s_m1_simChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- ================== MODULE 2 SLIDES ================== -->
+            <section>
+                <section>
+                    <span class="slide-badge">Module 02</span>
+                    <h2 data-i18n="slide_m2_title">Magnetic Gradients & Spatial Encoding</h2>
+                    <div class="slide-card">
+                        <p>To localize signals, small linear gradient fields are superimposed along $\hat{z}$:</p>
+                        <div class="slide-math">
+                            $$\vec{B}(x) = (B_0 + G_x x)\hat{z} \implies \omega(x) = \omega_0 + \gamma G_x x$$
+                        </div>
+                        <p style="font-size:0.85em;color:#9ca3af;">Each coordinate position $x$ precesses at a distinct frequency. Phase accumulates as $\phi(x, t) = \gamma G_x x t$.</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 data-i18n="slide_m2_iso">Spatial Isochromat Array Simulator</h2>
+                    <div class="slide-card">
+                        <div class="slide-controls">
+                            <label style="font-size:0.75em;">Gradient $G_x$: <span id="s_m2_gxVal" style="color:#60a5fa;font-family:var(--font-mono);">20 mT/m</span></label>
+                            <input type="range" id="s_m2_gxSlider" min="-50" max="50" step="1" value="20" style="width:140px;">
+                            <label style="font-size:0.75em;">Time $t$: <span id="s_m2_timeVal" style="color:#60a5fa;font-family:var(--font-mono);">5.0 ms</span></label>
+                            <input type="range" id="s_m2_timeSlider" min="0" max="15" step="0.2" value="5.0" style="width:140px;">
+                            <span style="font-size:0.75em;color:#9ca3af;margin-left:auto;">Net: <strong id="s_m2_resNetSignal" style="color:#fbbf24;">18.4%</strong></span>
+                            <button class="nb-btn-reset" onclick="resetModule(2)" style="margin-left:0.5rem;"><i data-lucide="rotate-ccw" style="width:11px;height:11px;"></i> <span data-i18n="btn_reset_baseline">Reset</span></button>
+                        </div>
+                        <div class="slide-canvas-box" style="height:230px;">
+                            <canvas id="s_m2_gradientCanvas" width="750" height="230" style="width:100%;height:100%;"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 data-i18n="slide_m2_sim">Live Simulation: Gradient Echo (GRE)</h2>
+                    <div class="slide-card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5em;">
+                            <span style="font-size:0.8em;font-family:var(--font-mono);color:#93c5fd;">Dephasing (-G) and Rephasing (+G) forming Echo at TE</span>
+                            <button id="s_m2_runCodeBtn" class="nb-btn nb-btn-primary" style="padding:3px 8px;font-size:0.75em;"><i data-lucide="play" style="width:12px;height:12px;"></i> <span data-i18n="btn_run_sim">Run with MRIjs</span></button>
+                        </div>
+                        <div id="s_m2_codeOutput" style="height:200px;position:relative;">
+                            <canvas id="s_m2_simChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- ================== MODULE 3 SLIDES ================== -->
+            <section>
+                <section>
+                    <span class="slide-badge">Module 03</span>
+                    <h2 data-i18n="slide_m3_title">RF Pulses & The B₁ Magnetic Field</h2>
+                    <div class="slide-card">
+                        <p>An oscillating field $\vec{B}_1(t) = 2 B_1^e(t) \cos(\omega_{rf} t)\hat{x}$ creates a resonant torque in the transverse plane. In the rotating frame at $\omega_{rf} = \omega_0$:</p>
+                        <div class="slide-math">
+                            $$\alpha = \int_0^{T_{rf}} \gamma B_1(t) \, dt \quad \stackrel{\text{Rect}}{\Longrightarrow} \quad \alpha = \gamma B_1 T_{rf}$$
+                        </div>
+                        <p style="font-size:0.85em;color:#9ca3af;">By engineering RF amplitude $B_1$ and duration $T_{rf}$, any flip angle $\alpha$ ($90^\circ$ excitation, $180^\circ$ refocusing) is generated.</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 data-i18n="slide_m3_nut">Interactive 3D Nutation & Slice Profiler</h2>
+                    <div class="slide-card">
+                        <div class="slide-controls">
+                            <label style="font-size:0.75em;">Flip: <span id="s_m3_flipVal" style="color:#60a5fa;font-family:var(--font-mono);">90°</span></label>
+                            <input type="range" id="s_m3_flipSlider" min="5" max="180" step="5" value="90" style="width:100px;">
+                            <label style="font-size:0.75em;">Duration: <span id="s_m3_durVal" style="color:#60a5fa;font-family:var(--font-mono);">2.0 ms</span></label>
+                            <input type="range" id="s_m3_durSlider" min="0.5" max="6.0" step="0.5" value="2.0" style="width:100px;">
+                            <button id="s_m3_animateTipBtn" class="nb-btn nb-btn-primary" style="padding:2px 8px;font-size:0.75em;"><i data-lucide="play" style="width:12px;height:12px;"></i> Tip Vector</button>
+                            <button class="nb-btn-reset" onclick="resetModule(3)" style="margin-left:auto;"><i data-lucide="rotate-ccw" style="width:11px;height:11px;"></i> <span data-i18n="btn_reset_baseline">Reset</span></button>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1em;">
+                            <div class="slide-canvas-box" style="height:210px;"><canvas id="s_m3_sphereCanvas" width="370" height="210" style="width:100%;height:100%;"></canvas></div>
+                            <div class="slide-canvas-box" style="height:210px;"><canvas id="s_m3_profileCanvas" width="370" height="210" style="width:100%;height:100%;"></canvas></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 data-i18n="slide_m3_sim">Live Simulation: Magnetization Dynamics</h2>
+                    <div class="slide-card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5em;">
+                            <span style="font-size:0.8em;font-family:var(--font-mono);color:#93c5fd;">Bloch Relaxation & Recovery post Flip</span>
+                            <button id="s_m3_runCodeBtn" class="nb-btn nb-btn-primary" style="padding:3px 8px;font-size:0.75em;"><i data-lucide="play" style="width:12px;height:12px;"></i> <span data-i18n="btn_run_sim">Run with MRIjs</span></button>
+                        </div>
+                        <div id="s_m3_codeOutput" style="height:200px;position:relative;">
+                            <canvas id="s_m3_simChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- ================== MODULE 4 SLIDES ================== -->
+            <section>
+                <section>
+                    <span class="slide-badge">Module 04</span>
+                    <h2 data-i18n="slide_m4_title">Image Formation & 2D k-Space</h2>
+                    <div class="slide-card">
+                        <p>The received signal $S(t)$ is the continuous 2D Fourier Transform of the object spin density $\rho(x, y)$:</p>
+                        <div class="slide-math">
+                            $$S(k_x, k_y) = \iint \rho(x, y) e^{-i 2\pi [k_x x + k_y y]} dx dy$$
+                        </div>
+                        <p style="font-size:0.85em;color:#9ca3af;">Reconstruction calculates the 2D Inverse Discrete Fourier Transform (2D IDFT) of k-space samples.</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 data-i18n="slide_m4_studio">Live 2D k-Space Studio on Slide</h2>
+                    <div class="slide-card">
+                        <div class="slide-controls">
+                            <div class="nb-btn-group">
+                                <button class="nb-btn m4-phantom-btn active" data-phantom="brain" style="font-size:0.75em;padding:2px 6px;">Brain</button>
+                                <button class="nb-btn m4-phantom-btn" data-phantom="geometric" style="font-size:0.75em;padding:2px 6px;">Shapes</button>
+                                <button class="nb-btn m4-phantom-btn" data-phantom="mrijs" style="font-size:0.75em;padding:2px 6px;">MRIjs</button>
+                            </div>
+                            <div class="nb-btn-group" style="margin-left:auto;">
+                                <button class="nb-btn m4-filter-btn active" data-filter="all" style="font-size:0.75em;padding:2px 6px;">Full</button>
+                                <button class="nb-btn m4-filter-btn" data-filter="lowpass" style="font-size:0.75em;padding:2px 6px;">Center</button>
+                                <button class="nb-btn m4-filter-btn" data-filter="highpass" style="font-size:0.75em;padding:2px 6px;">Edges</button>
+                                <button class="nb-btn m4-filter-btn" data-filter="undersample" style="font-size:0.75em;padding:2px 6px;">Undersample</button>
+                                <button class="nb-btn-reset" onclick="resetModule(4)" style="margin-left:0.4rem;"><i data-lucide="rotate-ccw" style="width:11px;height:11px;"></i> <span data-i18n="btn_reset_baseline">Reset</span></button>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1em;">
+                            <div>
+                                <span style="font-size:0.7em;color:#93c5fd;font-family:var(--font-mono);">k-Space $|S(k_x, k_y)|$</span>
+                                <div class="slide-canvas-box" style="height:190px;"><canvas id="s_m4_kspaceCanvas" width="190" height="190" role="img" aria-label="2D k-space magnitude on slide" style="image-rendering:pixelated;"></canvas></div>
+                            </div>
+                            <div>
+                                <span style="font-size:0.7em;color:#34d399;font-family:var(--font-mono);">Reconstructed $|\rho(x, y)|$</span>
+                                <div class="slide-canvas-box" style="height:190px;"><canvas id="s_m4_reconCanvas" width="190" height="190" role="img" aria-label="2D reconstructed anatomical image on slide" style="image-rendering:pixelated;"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 data-i18n="slide_m4_sim">Live Simulation: 1D Profile via 1D FFT</h2>
+                    <div class="slide-card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5em;">
+                            <span style="font-size:0.8em;font-family:var(--font-mono);color:#93c5fd;">1D Multi-Object Echo Reconstruction</span>
+                            <button id="s_m4_runCodeBtn" class="nb-btn nb-btn-primary" style="padding:3px 8px;font-size:0.75em;"><i data-lucide="play" style="width:12px;height:12px;"></i> <span data-i18n="btn_run_sim">Run with MRIjs</span></button>
+                        </div>
+                        <div id="s_m4_codeOutput" style="height:200px;position:relative;">
+                            <canvas id="s_m4_simChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- Final Slide -->
+            <section>
+                <span class="slide-badge" data-i18n="slide_summary_badge">Summary</span>
+                <h2 data-i18n="slide_summary_title">Key Takeaways</h2>
+                <div class="slide-card" style="font-size:0.85em;line-height:1.7;">
+                    <p data-i18n-html="slide_summary_b0">✓ <strong>B₀</strong> establishes precession frequency ω₀ = γ B₀ and chemical shift separations.</p>
+                    <p data-i18n-html="slide_summary_grad">✓ <strong>Gradients</strong> encode spatial position into frequency and phase ϕ(x) = γ G_x x t.</p>
+                    <p data-i18n-html="slide_summary_rf">✓ <strong>RF Pulses</strong> tip magnetization via resonant nutation α = γ ∫ B₁(t) dt.</p>
+                    <p data-i18n-html="slide_summary_recon">✓ <strong>Image Formation</strong> maps spatial frequency raw data S(k_x, k_y) into anatomy via 2D IDFT.</p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../bloch.js"></script>
+    <script src="notebooks.js"></script>
+    <script>
+        // Standalone initialization for slides.html
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.Reveal) {
+                const deck = new Reveal({
+                    hash: true,
+                    controls: true,
+                    progress: true,
+                    center: true,
+                    slideNumber: 'c/t',
+                    transition: 'slide',
+                    overview: true,
+                    keyboard: true,
+                    touch: true
+                });
+                deck.initialize().then(() => {
+                    initKaTeX();
+                    updateAllVisuals('slide');
+                    if (window.lucide) lucide.createIcons();
+                });
+                deck.on('slidechanged', () => {
+                    updateAllVisuals('slide');
+                    if (window.lucide) lucide.createIcons();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

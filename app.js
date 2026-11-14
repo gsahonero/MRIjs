@@ -122,9 +122,15 @@ function initThree() {
     // Cartesian coordinate cues (X, Y, Z arrows and labels)
     createCoordinateAxes();
 
-    // Raycasting for placements
-    container.addEventListener('pointerdown', onCanvasClick);
+    // Raycasting, pointer handling & keyboard accessibility for 3D Viewport
+    container.addEventListener('pointerdown', onCanvasPointerDown);
+    container.addEventListener('pointerup', onCanvasPointerUp);
     container.addEventListener('pointermove', onCanvasPointerMove);
+    container.addEventListener('contextmenu', onCanvasContextMenu);
+    container.addEventListener('keydown', onCanvasKeyDown);
+    container.setAttribute('tabindex', '0');
+    container.setAttribute('role', 'region');
+    container.setAttribute('aria-label', '3D Interactive Isochromat Canvas. Use Left-click drag or Arrow keys to orbit camera. Right-click along the X-axis grid to add a spin. Click an existing spin to edit.');
 
     // Handle Resize
     window.addEventListener('resize', () => {
@@ -708,19 +714,95 @@ function setupEventListeners() {
         });
     }
 
-    // Pointer grabbing cursor states
-    const threeContainer = document.getElementById('threeCanvasContainer');
-    threeContainer.addEventListener('pointerdown', () => {
-        if (threeContainer.style.cursor === 'grab') {
-            threeContainer.style.cursor = 'grabbing';
+    // Pointer tracking variables for drag vs. click differentiation
+    let pointerDownPos = { x: 0, y: 0 };
+    let pointerDownTime = 0;
+    let pointerDownButton = 0;
+
+    window.onCanvasPointerDown = function(event) {
+        pointerDownPos = { x: event.clientX, y: event.clientY };
+        pointerDownTime = performance.now();
+        pointerDownButton = event.button;
+
+        const container = document.getElementById('threeCanvasContainer');
+        if (container && container.style.cursor === 'grab') {
+            container.style.cursor = 'grabbing';
         }
-    });
+    };
+
+    window.onCanvasPointerUp = function(event) {
+        const container = document.getElementById('threeCanvasContainer');
+        if (container && container.style.cursor === 'grabbing') {
+            container.style.cursor = 'grab';
+        }
+
+        // Measure movement distance to differentiate dragging/orbiting from intentional clicks
+        const dist = Math.hypot(event.clientX - pointerDownPos.x, event.clientY - pointerDownPos.y);
+        if (dist > 6) {
+            // User was orbiting or panning the camera view; do not trigger click actions
+            return;
+        }
+
+        if (pointerDownButton === 0) {
+            // Left-click: strictly for editing existing spins, never creates new spin
+            handleCanvasLeftClick(event);
+        } else if (pointerDownButton === 2) {
+            // Right-click: creates new spin on empty canvas / grid, or edits existing spin
+            handleCanvasRightClick(event);
+        }
+    };
+
+    window.onCanvasContextMenu = function(event) {
+        event.preventDefault(); // Suppress default browser right-click menu over 3D canvas
+    };
+
+    window.onCanvasKeyDown = function(event) {
+        switch (event.key) {
+            case 'ArrowLeft':
+                event.preventDefault();
+                rotateCamera(0.15, 0);
+                break;
+            case 'ArrowRight':
+                event.preventDefault();
+                rotateCamera(-0.15, 0);
+                break;
+            case 'ArrowUp':
+                event.preventDefault();
+                rotateCamera(0, -0.12);
+                break;
+            case 'ArrowDown':
+                event.preventDefault();
+                rotateCamera(0, 0.12);
+                break;
+            case '+':
+            case '=':
+                event.preventDefault();
+                if (camera && controls) {
+                    camera.position.multiplyScalar(0.92);
+                    controls.update();
+                }
+                break;
+            case '-':
+            case '_':
+                event.preventDefault();
+                if (camera && controls) {
+                    camera.position.multiplyScalar(1.08);
+                    controls.update();
+                }
+                break;
+            case 'Enter':
+            case 'Insert':
+                event.preventDefault();
+                openAddSpinDialog(0.0);
+                break;
+        }
+    };
 }
 
 // Change cursor to reflect actions (editing, placing, or rotating)
 function onCanvasPointerMove(event) {
     const container = document.getElementById('threeCanvasContainer');
-    if (!renderer || !camera) return;
+    if (!renderer || !camera || !container) return;
     
     const rect = renderer.domElement.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -735,6 +817,7 @@ function onCanvasPointerMove(event) {
 
     if (intersects.length > 0) {
         container.style.cursor = 'pointer'; // indicates click to edit
+        container.title = 'Left-click to edit or remove this isochromat';
         return;
     }
 
@@ -742,21 +825,46 @@ function onCanvasPointerMove(event) {
     const planeY = new THREE.Plane(new THREE.Vector3(0, 1.0, 0), 0);
     const intersection = new THREE.Vector3();
     if (raycaster.ray.intersectPlane(planeY, intersection)) {
-        if (Math.abs(intersection.z) < 1.5 && Math.abs(intersection.x) <= 5.5) {
-            container.style.cursor = 'crosshair'; // indicates click to place isochromat
+        if (Math.abs(intersection.z) < 2.5 && Math.abs(intersection.x) <= 5.5) {
+            container.style.cursor = 'crosshair'; // indicates right-click to place
+            container.title = 'Right-click to place a new isochromat at this position';
             return;
         }
     }
 
     container.style.cursor = 'grab'; // default dragging behavior
+    container.title = 'Left-click & drag to rotate 3D view';
 }
 
-// Raycaster to handle user click on the 3D panel
-function onCanvasClick(event) {
-    const container = document.getElementById('threeCanvasContainer');
+// Left click handler: inspect/edit existing isochromats (never creates spins)
+function handleCanvasLeftClick(event) {
+    if (!renderer || !camera) return;
     const rect = renderer.domElement.getBoundingClientRect();
-    
-    // Normalized coordinates
+    const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
+
+    const sphereMeshes = Object.values(spinVisuals).map(v => v.sphereMesh);
+    const intersects = raycaster.intersectObjects(sphereMeshes);
+
+    if (intersects.length > 0) {
+        const hitSphere = intersects[0].object;
+        const hitSpinId = Object.keys(spinVisuals).find(key => spinVisuals[key].sphereMesh === hitSphere);
+        if (hitSpinId) {
+            const hitSpin = isochromats.find(iso => iso.id === hitSpinId);
+            if (hitSpin) {
+                openEditSpinDialog(hitSpin);
+            }
+        }
+    }
+}
+
+// Right click handler: creates new isochromat on empty canvas / grid, or edits existing
+function handleCanvasRightClick(event) {
+    if (!renderer || !camera) return;
+    const rect = renderer.domElement.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
@@ -779,12 +887,11 @@ function onCanvasClick(event) {
         }
     }
 
-    // 2. Project onto XZ vertical plane (Y = 0) to add spin
+    // 2. Project onto XZ vertical plane (Y = 0) to add spin on right-click
     const planeY = new THREE.Plane(new THREE.Vector3(0, 1.0, 0), 0);
     const intersection = new THREE.Vector3();
     if (raycaster.ray.intersectPlane(planeY, intersection)) {
-        // If user clicks near the line (let's say Z is close to 0, e.g. within 1.5 units)
-        if (Math.abs(intersection.z) < 1.5 && Math.abs(intersection.x) <= 5.5) {
+        if (Math.abs(intersection.z) < 2.5 && Math.abs(intersection.x) <= 5.5) {
             const xNorm = Math.max(-1.0, Math.min(1.0, intersection.x / 5.0));
             const roundedX = Math.round(xNorm * 10) / 10;
             openAddSpinDialog(roundedX);
@@ -804,7 +911,15 @@ function openAddSpinDialog(posX) {
     document.getElementById('spinWInput').value = 0.0;
     
     document.getElementById('deleteSpinBtn').style.display = 'none';
-    document.getElementById('spinDialog').showModal();
+    const dialog = document.getElementById('spinDialog');
+    dialog.showModal();
+    setTimeout(() => {
+        const input = document.getElementById('spinXInput');
+        if (input) {
+            input.focus();
+            input.select();
+        }
+    }, 50);
 }
 
 // Open modal to edit existing spin
@@ -819,7 +934,15 @@ function openEditSpinDialog(spin) {
     document.getElementById('spinWInput').value = spin.w;
 
     document.getElementById('deleteSpinBtn').style.display = 'block';
-    document.getElementById('spinDialog').showModal();
+    const dialog = document.getElementById('spinDialog');
+    dialog.showModal();
+    setTimeout(() => {
+        const input = document.getElementById('spinT1Input');
+        if (input) {
+            input.focus();
+            input.select();
+        }
+    }, 50);
 }
 
 // Update the list of spins in the sidebar table
@@ -828,7 +951,7 @@ function updateSpinListTable() {
     tbody.innerHTML = '';
 
     if (isochromats.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No active spins. Click on the 3D grid to place one.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No active spins. Right-click on the 3D grid or click "+ Add" above to place one.</td></tr>';
         return;
     }
 

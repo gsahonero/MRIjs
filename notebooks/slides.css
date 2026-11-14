@@ -1,0 +1,204 @@
+/* Reveal.js Custom Theme for MRIjs Interactive Presentation */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+.reveal-viewport {
+    background: #06080e !important;
+}
+
+.reveal {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    font-size: 24px;
+    font-weight: 400;
+    color: #e5e7eb;
+}
+
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: 'Outfit', sans-serif !important;
+    text-transform: none !important;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+}
+
+.reveal h1 {
+    font-size: 2.2em !important;
+    background: linear-gradient(135deg, #60a5fa, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.4em !important;
+}
+
+.reveal h2 {
+    font-size: 1.6em !important;
+    color: #f9fafb !important;
+    margin-bottom: 0.5em !important;
+}
+
+.reveal h3 {
+    font-size: 1.2em !important;
+    color: #93c5fd !important;
+    margin-bottom: 0.4em !important;
+}
+
+.reveal p {
+    line-height: 1.5;
+    margin-bottom: 0.8em;
+}
+
+/* Slide Cards and Containers */
+.slide-card {
+    background: rgba(18, 22, 33, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.2em 1.5em;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
+    margin: 0.5em auto;
+    max-width: 960px;
+    text-align: left;
+}
+
+.slide-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2em;
+    align-items: center;
+}
+
+.slide-badge {
+    display: inline-block;
+    font-family: 'Space Grotesk', monospace;
+    font-size: 0.55em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.3em 0.8em;
+    border-radius: 9999px;
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    margin-bottom: 0.5em;
+}
+
+/* Slide Controls and Inputs */
+.slide-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8em;
+    align-items: center;
+    margin-bottom: 0.8em;
+    pointer-events: auto;
+}
+
+.slide-controls input[type="range"] {
+    accent-color: #3b82f6;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.slide-controls select, .slide-controls button {
+    pointer-events: auto;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8em;
+}
+
+/* Math block in slide */
+.slide-math {
+    background: rgba(10, 13, 20, 0.9);
+    border-left: 4px solid #3b82f6;
+    border-radius: 6px;
+    padding: 0.8em 1.2em;
+    margin: 0.6em 0;
+    font-size: 0.95em;
+    text-align: center;
+}
+
+/* Metric pills */
+.slide-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.6em;
+    margin: 0.8em 0;
+}
+
+.slide-metric {
+    background: rgba(10, 13, 20, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 0.5em 0.8em;
+    text-align: center;
+}
+
+.slide-metric-label {
+    font-size: 0.6em;
+    color: #9ca3af;
+    text-transform: uppercase;
+    display: block;
+}
+
+.slide-metric-val {
+    font-family: 'Space Grotesk', monospace;
+    font-size: 1.05em;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* Canvases inside slides */
+.slide-canvas-box {
+    background: #04060a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Code box inside slides */
+.slide-code {
+    background: #06090e;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.8em 1em;
+    font-family: 'Space Grotesk', monospace;
+    font-size: 0.65em;
+    line-height: 1.45;
+    text-align: left;
+    overflow-x: auto;
+    color: #e2e8f0;
+}
+
+/* Floating Switcher Toolbar for Slides */
+.slides-nav-bar {
+    position: fixed;
+    top: 15px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-slide-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #f3f4f6;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-slide-nav:hover {
+    background: rgba(59, 130, 246, 0.25);
+    border-color: #3b82f6;
+    color: #ffffff;
+}
