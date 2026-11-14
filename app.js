@@ -713,90 +713,92 @@ function setupEventListeners() {
             panCameraToX(targetX);
         });
     }
+}
 
-    // Pointer tracking variables for drag vs. click differentiation
-    let pointerDownPos = { x: 0, y: 0 };
-    let pointerDownTime = 0;
-    let pointerDownButton = 0;
+// -------------------------------------------------------------
+// 3D Canvas Pointer Tracking & Accessibility Event Handlers
+// -------------------------------------------------------------
+let pointerDownPos = { x: 0, y: 0 };
+let pointerDownTime = 0;
+let pointerDownButton = 0;
 
-    window.onCanvasPointerDown = function(event) {
-        pointerDownPos = { x: event.clientX, y: event.clientY };
-        pointerDownTime = performance.now();
-        pointerDownButton = event.button;
+function onCanvasPointerDown(event) {
+    pointerDownPos = { x: event.clientX, y: event.clientY };
+    pointerDownTime = performance.now();
+    pointerDownButton = event.button;
 
-        const container = document.getElementById('threeCanvasContainer');
-        if (container && container.style.cursor === 'grab') {
-            container.style.cursor = 'grabbing';
-        }
-    };
+    const container = document.getElementById('threeCanvasContainer');
+    if (container && container.style.cursor === 'grab') {
+        container.style.cursor = 'grabbing';
+    }
+}
 
-    window.onCanvasPointerUp = function(event) {
-        const container = document.getElementById('threeCanvasContainer');
-        if (container && container.style.cursor === 'grabbing') {
-            container.style.cursor = 'grab';
-        }
+function onCanvasPointerUp(event) {
+    const container = document.getElementById('threeCanvasContainer');
+    if (container && container.style.cursor === 'grabbing') {
+        container.style.cursor = 'grab';
+    }
 
-        // Measure movement distance to differentiate dragging/orbiting from intentional clicks
-        const dist = Math.hypot(event.clientX - pointerDownPos.x, event.clientY - pointerDownPos.y);
-        if (dist > 6) {
-            // User was orbiting or panning the camera view; do not trigger click actions
-            return;
-        }
+    // Measure movement distance to differentiate dragging/orbiting from intentional clicks
+    const dist = Math.hypot(event.clientX - pointerDownPos.x, event.clientY - pointerDownPos.y);
+    if (dist > 6) {
+        // User was orbiting or panning the camera view; do not trigger click actions
+        return;
+    }
 
-        if (pointerDownButton === 0) {
-            // Left-click: strictly for editing existing spins, never creates new spin
-            handleCanvasLeftClick(event);
-        } else if (pointerDownButton === 2) {
-            // Right-click: creates new spin on empty canvas / grid, or edits existing spin
-            handleCanvasRightClick(event);
-        }
-    };
+    if (pointerDownButton === 0) {
+        // Left-click: strictly for editing existing spins, never creates new spin
+        handleCanvasLeftClick(event);
+    } else if (pointerDownButton === 2) {
+        // Right-click: creates new spin on empty canvas / grid, or edits existing spin
+        handleCanvasRightClick(event);
+    }
+}
 
-    window.onCanvasContextMenu = function(event) {
-        event.preventDefault(); // Suppress default browser right-click menu over 3D canvas
-    };
+function onCanvasContextMenu(event) {
+    event.preventDefault(); // Suppress default browser right-click menu over 3D canvas
+}
 
-    window.onCanvasKeyDown = function(event) {
-        switch (event.key) {
-            case 'ArrowLeft':
-                event.preventDefault();
-                rotateCamera(0.15, 0);
-                break;
-            case 'ArrowRight':
-                event.preventDefault();
-                rotateCamera(-0.15, 0);
-                break;
-            case 'ArrowUp':
-                event.preventDefault();
-                rotateCamera(0, -0.12);
-                break;
-            case 'ArrowDown':
-                event.preventDefault();
-                rotateCamera(0, 0.12);
-                break;
-            case '+':
-            case '=':
-                event.preventDefault();
-                if (camera && controls) {
-                    camera.position.multiplyScalar(0.92);
-                    controls.update();
-                }
-                break;
-            case '-':
-            case '_':
-                event.preventDefault();
-                if (camera && controls) {
-                    camera.position.multiplyScalar(1.08);
-                    controls.update();
-                }
-                break;
-            case 'Enter':
-            case 'Insert':
-                event.preventDefault();
-                openAddSpinDialog(0.0);
-                break;
-        }
-    };
+function onCanvasKeyDown(event) {
+    switch (event.key) {
+        case 'ArrowLeft':
+            event.preventDefault();
+            rotateCamera(0.15, 0);
+            break;
+        case 'ArrowRight':
+            event.preventDefault();
+            rotateCamera(-0.15, 0);
+            break;
+        case 'ArrowUp':
+            event.preventDefault();
+            rotateCamera(0, -0.12);
+            break;
+        case 'ArrowDown':
+            event.preventDefault();
+            rotateCamera(0, 0.12);
+            break;
+        case '+':
+        case '=':
+            event.preventDefault();
+            if (camera && controls) {
+                camera.position.multiplyScalar(0.92);
+                controls.update();
+            }
+            break;
+        case '-':
+        case '_':
+            event.preventDefault();
+            if (camera && controls) {
+                camera.position.multiplyScalar(1.08);
+                controls.update();
+            }
+            break;
+        case 'Enter':
+        case 'Insert':
+            event.preventDefault();
+            openAddSpinDialog(0.0);
+            break;
+    }
 }
 
 // Change cursor to reflect actions (editing, placing, or rotating)
