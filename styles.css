@@ -501,8 +501,17 @@ dialog .actions {
     background: rgba(59, 130, 246, 0.15);
 }
 
-.menu-item:hover .dropdown-content {
+.menu-item {
+    position: relative;
+}
+
+.menu-item.open .dropdown-content,
+.menu-item:hover:not(.closed) .dropdown-content {
     display: block;
+}
+
+.menu-item.closed .dropdown-content {
+    display: none !important;
 }
 
 /* Viewport Controls */

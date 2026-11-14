@@ -477,16 +477,21 @@ function setupEventListeners() {
         runPhysicsTests();
     });
 
+    // Initialize accessible dropdown menus
+    initTopMenus();
+
     // Top Dropdown Menu Listeners
     // File -> Save Experiment
     document.getElementById('menuSaveExp').addEventListener('click', (e) => {
         e.preventDefault();
+        closeAllMenus();
         saveExperiment();
     });
 
     // File -> Load Experiment
     document.getElementById('menuLoadExp').addEventListener('click', (e) => {
         e.preventDefault();
+        closeAllMenus();
         document.getElementById('experimentFileInput').click();
     });
 
@@ -498,6 +503,7 @@ function setupEventListeners() {
     // Settings -> Interface Configuration
     document.getElementById('menuInterfaceConfig').addEventListener('click', (e) => {
         e.preventDefault();
+        closeAllMenus();
         document.getElementById('sphereRadiusSlider').value = currentSphereRadius;
         document.getElementById('sphereRadiusVal').innerText = currentSphereRadius.toFixed(2);
         document.getElementById('interfaceDialog').showModal();
@@ -513,12 +519,14 @@ function setupEventListeners() {
     // Help -> Quick Guide
     document.getElementById('menuQuickGuide').addEventListener('click', (e) => {
         e.preventDefault();
+        closeAllMenus();
         document.getElementById('quickGuideDialog').showModal();
     });
 
     // Help -> About
     document.getElementById('menuAbout').addEventListener('click', (e) => {
         e.preventDefault();
+        closeAllMenus();
         document.getElementById('aboutDialog').showModal();
     });
 
@@ -799,6 +807,75 @@ function onCanvasKeyDown(event) {
             openAddSpinDialog(0.0);
             break;
     }
+}
+
+// -------------------------------------------------------------
+// Top Navigation Dropdown Menu Accessibility & Auto-Close
+// -------------------------------------------------------------
+function closeAllMenus() {
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('open');
+        item.classList.add('closed');
+        const trigger = item.querySelector('.menu-trigger');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        setTimeout(() => item.classList.remove('closed'), 150);
+    });
+    if (document.activeElement && document.activeElement.closest('.dropdown-content')) {
+        document.activeElement.blur();
+    }
+}
+
+function initTopMenus() {
+    const menuItems = document.querySelectorAll('.menu-item');
+
+    menuItems.forEach(item => {
+        const trigger = item.querySelector('.menu-trigger');
+        if (!trigger) return;
+
+        trigger.setAttribute('tabindex', '0');
+        trigger.setAttribute('role', 'button');
+        trigger.setAttribute('aria-haspopup', 'true');
+        trigger.setAttribute('aria-expanded', 'false');
+
+        const toggleMenu = (e) => {
+            e.stopPropagation();
+            const isOpen = item.classList.contains('open');
+            closeAllMenus();
+            if (!isOpen) {
+                item.classList.add('open');
+                trigger.setAttribute('aria-expanded', 'true');
+            }
+        };
+
+        trigger.addEventListener('click', toggleMenu);
+        trigger.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleMenu(e);
+            }
+        });
+    });
+
+    // Close menus whenever any link inside is clicked
+    document.querySelectorAll('.dropdown-content a').forEach(link => {
+        link.addEventListener('click', () => {
+            closeAllMenus();
+        });
+    });
+
+    // Close when clicking outside of any menu
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.menu-item')) {
+            closeAllMenus();
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeAllMenus();
+        }
+    });
 }
 
 // Change cursor to reflect actions (editing, placing, or rotating)

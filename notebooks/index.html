@@ -68,13 +68,43 @@
     <!-- MODALITY 1: LIVE SCIENCE DOCUMENT / COMPUTATIONAL PAPER            -->
     <!-- =================================================================== -->
     <div id="viewPaper">
+        <!-- Floating Section Outline (Scroll-Spy) -->
+        <aside class="floating-paper-outline" id="floatingOutline" aria-label="Table of Contents">
+            <div class="outline-header">
+                <i data-lucide="compass" style="width:13px;height:13px;"></i>
+                <span data-i18n="outline_title">Document Outline</span>
+            </div>
+            <nav class="outline-nav">
+                <a href="#sec1" class="outline-link active" data-target="sec1">
+                    <span class="outline-badge">§1</span>
+                    <span class="outline-text" data-i18n="outline_sec1">§1 B₀ Field & Precession</span>
+                </a>
+                <a href="#sec2" class="outline-link" data-target="sec2">
+                    <span class="outline-badge">§2</span>
+                    <span class="outline-text" data-i18n="outline_sec2">§2 Gradient Spatial Encoding</span>
+                </a>
+                <a href="#sec3" class="outline-link" data-target="sec3">
+                    <span class="outline-badge">§3</span>
+                    <span class="outline-text" data-i18n="outline_sec3">§3 RF Pulses & B₁ Nutation</span>
+                </a>
+                <a href="#sec4" class="outline-link" data-target="sec4">
+                    <span class="outline-badge">§4</span>
+                    <span class="outline-text" data-i18n="outline_sec4">§4 k-Space & Reconstruction</span>
+                </a>
+                <a href="#sec5" class="outline-link" data-target="sec5">
+                    <span class="outline-badge">§5</span>
+                    <span class="outline-text" data-i18n="outline_sec5">§5 References</span>
+                </a>
+            </nav>
+        </aside>
+
         <article class="paper-wrapper">
             
             <!-- Masthead -->
             <header class="paper-masthead">
                 <div class="paper-series-tag">
                     <i data-lucide="terminal" style="width:14px;height:14px;"></i>
-                    <span data-i18n="paper_series">COMPUTATIONAL MRI PHYSICS // LIVE INTERACTIVE PAPER</span>
+                    <span data-i18n="paper_series">COMPUTATIONAL MRI PHYSICS // INTERACTIVE STUDY MODULES</span>
                 </div>
                 <h1 class="paper-title" data-i18n="paper_title">The Physical Foundations of Magnetic Resonance</h1>
                 <p class="paper-subtitle" data-i18n="paper_subtitle">
@@ -82,7 +112,7 @@
                 </p>
                 <div class="paper-metadata-row">
                     <span class="paper-author"><i data-lucide="user" style="width:13px;height:13px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> <span data-i18n="paper_author">MRIjs Research & Learning Lab</span></span>
-                    <span class="paper-pill-meta" data-i18n="meta_bloch_engine">CLIENT-SIDE BLOCH ENGINE</span>
+                    <span class="paper-pill-meta" data-i18n="meta_bloch_engine">NUMERICAL BLOCH INTEGRATION</span>
                     <span class="paper-pill-meta" data-i18n="meta_katex">KATEX ACTIVE</span>
                     <span class="paper-pill-meta" data-i18n="meta_open_access">OPEN ACCESS</span>
                 </div>
@@ -90,8 +120,8 @@
 
             <!-- Abstract -->
             <div class="paper-abstract">
-                <strong data-i18n="abstract_title">Abstract & Computational Paradigm</strong>
-                <span data-i18n="abstract_body">This document is a live computational paper. Rather than static equations and pre-rendered figures, every formula, graph, and vector simulation below is wired to a real-time Bloch equation solver executed directly inside your web browser. You can alter parameters, observe live phase fan-out, explore the rotating frame, filter 2D k-space frequencies, and execute MRIjs code live.</span>
+                <strong data-i18n="abstract_title">Abstract & Computational Framework</strong>
+                <span data-i18n="abstract_body">This computational document presents a rigorous interactive analysis of fundamental magnetic resonance physics. Theoretical formulations, spin isochromat trajectories, and frequency spectra are evaluated dynamically via numerical integration of the Bloch equations directly within the client environment. The module provides quantitative investigation of Larmor precession proportionality, gradient-induced phase dispersion, resonant radiofrequency nutation dynamics, and spatial frequency encoding in two-dimensional Cartesian k-space.</span>
             </div>
 
             <!-- Table of Contents Bar -->
@@ -108,7 +138,7 @@
             <!-- ----------------------------------------------------------- -->
             <section id="sec1" class="paper-section">
                 <span class="paper-sec-num" data-i18n="sec1_tag">Section 01</span>
-                <h2 class="paper-sec-title" data-i18n="sec1_title">How does B₀ influence the precession frequency?</h2>
+                <h2 class="paper-sec-title" data-i18n="sec1_title">Static Field Strength (B₀) and Nuclear Precession Frequency Dynamics</h2>
                 
                 <div class="paper-body">
                     <p data-i18n-html="sec1_p1">
@@ -261,7 +291,7 @@
             <!-- ----------------------------------------------------------- -->
             <section id="sec2" class="paper-section">
                 <span class="paper-sec-num" data-i18n="sec2_tag">Section 02</span>
-                <h2 class="paper-sec-title" data-i18n="sec2_title">How gradients produce the required magnetic fields to encode position?</h2>
+                <h2 class="paper-sec-title" data-i18n="sec2_title">Spatial Position Encoding via Linear Magnetic Field Gradients</h2>
                 
                 <div class="paper-body">
                     <p data-i18n-html="sec2_p1">
@@ -386,7 +416,7 @@
             <!-- ----------------------------------------------------------- -->
             <section id="sec3" class="paper-section">
                 <span class="paper-sec-num" data-i18n="sec3_tag">Section 03</span>
-                <h2 class="paper-sec-title" data-i18n="sec3_title">How RF pulses produce the B₁ magnetic field?</h2>
+                <h2 class="paper-sec-title" data-i18n="sec3_title">Resonant Radiofrequency Excitation and B₁ Nutation Dynamics</h2>
                 
                 <div class="paper-body">
                     <p data-i18n-html="sec3_p1">
@@ -553,7 +583,7 @@
             <!-- ----------------------------------------------------------- -->
             <section id="sec4" class="paper-section">
                 <span class="paper-sec-num" data-i18n="sec4_tag">Section 04</span>
-                <h2 class="paper-sec-title" data-i18n="sec4_title">How is the image formed? (k-Space to Real Space)</h2>
+                <h2 class="paper-sec-title" data-i18n="sec4_title">Signal Reception, 2D k-Space Formalism, and Image Reconstruction</h2>
                 
                 <div class="paper-body">
                     <p data-i18n-html="sec4_p1">

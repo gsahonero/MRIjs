@@ -50,10 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initKaTeX();
     initSharedInteractions();
     initCheckpoints();
+    initScrollSpy();
 
-    // Check URL parameters or hash
+    // Check URL parameters, hash, or standalone slides page
     const params = new URLSearchParams(window.location.search);
-    if (params.get('mode') === 'slides' || window.location.hash.startsWith('#/')) {
+    if (params.get('mode') === 'slides' || window.location.hash.startsWith('#/') || (document.querySelector('.reveal') && !document.getElementById('viewPaper'))) {
         setModality('slides');
     } else {
         setModality('paper');
@@ -392,19 +393,25 @@ function startDualFrameAnimLoop() {
         lastTime = time;
 
         if (stateM1.running) {
-            stateM1.labTheta += (2 * Math.PI * 1.5) * dt;
+            const gamma = NUCLEI_GAMMA[stateM1.nucleus] || 42.576;
+            const f0 = gamma * stateM1.b0; // Larmor frequency in MHz
+            // Visual lab frame rate scales proportionally with f0:
+            // Standard 1.5 T 1H (63.864 MHz) -> 1.5 Hz visual rate
+            // Scales dynamically from ~0.1 Hz (ultra-low field) to ~7.5 Hz (high field)
+            const visualLabFreqHz = Math.min(7.5, Math.max(0.1, (f0 / 63.864) * 1.5));
+            stateM1.labTheta += (2 * Math.PI * visualLabFreqHz) * dt;
             stateM1.rotTheta += (2 * Math.PI * (stateM1.df * 0.2)) * dt;
         }
 
         // Render Paper Canvas if visible
         const cPaper = document.getElementById('m1_frameCanvas');
-        if (cPaper && currentModality === 'paper') {
+        if (cPaper && (currentModality === 'paper' || cPaper.offsetParent !== null)) {
             drawDualFramesCanvas(cPaper, stateM1.labTheta, stateM1.rotTheta, stateM1.df);
         }
 
         // Render Slide Canvas if visible
         const cSlide = document.getElementById('s_m1_frameCanvas');
-        if (cSlide && currentModality === 'slides') {
+        if (cSlide && (currentModality === 'slides' || cSlide.offsetParent !== null)) {
             drawDualFramesCanvas(cSlide, stateM1.labTheta, stateM1.rotTheta, stateM1.df);
         }
 
@@ -422,9 +429,15 @@ function drawDualFramesCanvas(canvas, labTheta, rotTheta, df) {
     const halfW = width / 2;
     const r = Math.min(halfW, height) * 0.35;
 
+    const gamma = NUCLEI_GAMMA[stateM1.nucleus] || 42.576;
+    const f0 = gamma * stateM1.b0;
+    const visualLabFreqHz = Math.min(7.5, Math.max(0.1, (f0 / 63.864) * 1.5));
+
     // Left: Laboratory Frame
     const labTitle = currentLang === 'es' ? 'Marco del Laboratorio' : 'Laboratory Frame';
-    const labSub = currentLang === 'es' ? 'Precesión a ω₀ ≈ 64-128 MHz' : 'Precessing at ω₀ ≈ 64-128 MHz';
+    const labSub = currentLang === 'es' 
+        ? `Precesión: f₀ = ${f0.toFixed(2)} MHz (animación: ${visualLabFreqHz.toFixed(1)} Hz)`
+        : `Precession: f₀ = ${f0.toFixed(2)} MHz (scaled: ${visualLabFreqHz.toFixed(1)} Hz)`;
     drawFrameView(ctx, halfW * 0.5, height * 0.5, r, labTitle, labSub, labTheta, '#3b82f6', true);
 
     // Divider
@@ -1266,10 +1279,10 @@ function startCartesianTrajAnimLoop() {
         const cPaper = document.getElementById('m4_trajCanvas');
         const cSlide = document.getElementById('s_m4_trajCanvas');
 
-        if (cPaper && currentModality === 'paper') {
+        if (cPaper && (currentModality === 'paper' || cPaper.offsetParent !== null)) {
             drawCartesianTraj(cPaper, currentLine, totalLines, scanProgress);
         }
-        if (cSlide && currentModality === 'slides') {
+        if (cSlide && (currentModality === 'slides' || cSlide.offsetParent !== null)) {
             drawCartesianTraj(cSlide, currentLine, totalLines, scanProgress);
         }
 
@@ -1670,14 +1683,14 @@ function initCheckpoints() {
                     btn.classList.add('correct');
                     if (feedback) {
                         feedback.className = 'checkpoint-feedback show correct';
-                        const okLbl = currentLang === 'es' ? '¡Correcto!' : 'Correct!';
+                        const okLbl = currentLang === 'es' ? 'Respuesta correcta.' : 'Correct analysis.';
                         feedback.innerHTML = `<strong><i data-lucide="check-circle" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> ${okLbl}</strong> ` + btn.getAttribute('data-explanation');
                     }
                 } else {
                     btn.classList.add('incorrect');
                     if (feedback) {
                         feedback.className = 'checkpoint-feedback show incorrect';
-                        const noLbl = currentLang === 'es' ? 'No exactamente.' : 'Not quite.';
+                        const noLbl = currentLang === 'es' ? 'Respuesta incorrecta.' : 'Incorrect.';
                         feedback.innerHTML = `<strong><i data-lucide="alert-circle" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> ${noLbl}</strong> ` + btn.getAttribute('data-explanation');
                     }
                 }
@@ -1685,4 +1698,36 @@ function initCheckpoints() {
             });
         });
     });
+}
+
+// -------------------------------------------------------------
+// Floating Paper Outline Scroll-Spy
+// -------------------------------------------------------------
+function initScrollSpy() {
+    const secIds = ['sec1', 'sec2', 'sec3', 'sec4', 'sec5'];
+    const sections = secIds.map(id => document.getElementById(id)).filter(Boolean);
+    const outlineLinks = document.querySelectorAll('.outline-link');
+    if (!sections.length || !outlineLinks.length) return;
+
+    // Smooth active state updating via IntersectionObserver
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const targetId = entry.target.id;
+                outlineLinks.forEach(link => {
+                    if (link.getAttribute('data-target') === targetId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+        });
+    }, {
+        root: null,
+        rootMargin: '-10% 0px -65% 0px',
+        threshold: 0
+    });
+
+    sections.forEach(sec => observer.observe(sec));
 }
