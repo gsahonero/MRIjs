@@ -24,6 +24,7 @@
                 <div class="menu-item">
                     <span class="menu-trigger">File</span>
                     <div class="dropdown-content">
+                        <a href="#" id="menuImportPulseq"><i data-lucide="file-code" style="width:12px; height:12px; vertical-align: middle; margin-right: 6px; display: inline-block;"></i>Import Pulseq (.seq)</a>
                         <a href="#" id="menuSaveExp"><i data-lucide="download" style="width:12px; height:12px; vertical-align: middle; margin-right: 6px; display: inline-block;"></i>Save Experiment</a>
                         <a href="#" id="menuLoadExp"><i data-lucide="upload" style="width:12px; height:12px; vertical-align: middle; margin-right: 6px; display: inline-block;"></i>Load Experiment</a>
                     </div>
@@ -54,6 +55,7 @@
         
         <!-- Hidden elements for file loading -->
         <input type="file" id="experimentFileInput" style="display:none;" accept=".json">
+        <input type="file" id="pulseqFileInput" style="display:none;" accept=".seq,.txt">
     </header>
 
     <div class="app-container">
@@ -69,7 +71,61 @@
                         <option value="FID">Free Induction Decay (FID)</option>
                         <option value="GRE">Gradient Echo (GRE)</option>
                         <option value="SE">Spin Echo (SE)</option>
+                        <option value="PULSEQ">Pulseq Sequence (.seq)</option>
                     </select>
+                </div>
+            </div>
+
+            <!-- Pulseq Sequence Configuration Card -->
+            <div id="pulseqControlCard" class="control-card" style="display: none; border-color: rgba(56, 189, 248, 0.4); background: rgba(8, 20, 36, 0.4);">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
+                    <h3 style="border: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 0.4rem; color: #38bdf8;">
+                        <i data-lucide="file-code" style="width: 14px; height: 14px;"></i>
+                        Pulseq Sequence
+                    </h3>
+                    <span id="pulseqVersionBadge" style="font-size: 0.65rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 4px; padding: 2px 6px; font-family: var(--font-mono);">v1.4.0</span>
+                </div>
+
+                <!-- File upload / drop area -->
+                <div id="pulseqDropZone" style="border: 2px dashed rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s ease; background: rgba(56, 189, 248, 0.04); margin-bottom: 0.75rem;">
+                    <i data-lucide="upload-cloud" style="width: 22px; height: 22px; color: #38bdf8; margin-bottom: 0.25rem;"></i>
+                    <div style="font-size: 0.75rem; font-weight: 500; color: var(--text-primary); margin-bottom: 0.2rem;">Import .seq File</div>
+                    <div style="font-size: 0.65rem; color: var(--text-secondary);">Click or drop your Pulseq file here</div>
+                </div>
+
+                <!-- Built-in Sequence Presets -->
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label for="pulseqPresetSelect">Sample Presets</label>
+                    <select id="pulseqPresetSelect" style="font-size: 0.8rem;">
+                        <option value="FID">Sample: Free Induction Decay (FID)</option>
+                        <option value="GRE">Sample: Gradient Echo (GRE)</option>
+                        <option value="SE">Sample: Spin Echo (SE)</option>
+                        <option value="SINC">Sample: Apodized Sinc RF Pulse</option>
+                    </select>
+                </div>
+
+                <!-- Sequence Metadata Details -->
+                <div id="pulseqMetaCard" style="background: rgba(10, 15, 26, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 6px; padding: 0.5rem; font-size: 0.7rem; line-height: 1.4; display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.75rem;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-secondary);">Name:</span>
+                        <span id="pulseqMetaName" style="color: var(--text-primary); font-weight: 500; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Free_Induction_Decay_FID</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-secondary);">Duration:</span>
+                        <span id="pulseqMetaDuration" style="color: var(--text-primary); font-family: var(--font-mono);">200.0 ms</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-secondary);">Blocks / Events:</span>
+                        <span id="pulseqMetaBlocks" style="color: var(--text-primary); font-family: var(--font-mono);">2 blk (1 RF, 0 G, 1 ADC)</span>
+                    </div>
+                </div>
+
+                <!-- Gradient sensitivity / scale -->
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label for="pulseqGradScaleSlider" style="margin: 0;">Gradient Scaling (<span id="pulseqGradScaleVal">1.0x</span>)</label>
+                    </div>
+                    <input type="range" id="pulseqGradScaleSlider" min="0.1" max="5.0" step="0.1" value="1.0" style="width: 100%; margin-top: 0.25rem; accent-color: #38bdf8;">
                 </div>
             </div>
 
@@ -200,6 +256,10 @@
                     <div id="testSeRow" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary);">
                         <i data-lucide="circle-dashed" style="width: 14px; height: 14px; color: var(--text-muted);"></i>
                         <span>SE: Spin Echo Refocus at t = TE</span>
+                    </div>
+                    <div id="testPulseqRow" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary);">
+                        <i data-lucide="circle-dashed" style="width: 14px; height: 14px; color: var(--text-muted);"></i>
+                        <span>Pulseq: Import, Decompress & Solve</span>
                     </div>
                 </div>
             </div>
@@ -360,6 +420,7 @@
     </dialog>
 
     <!-- Custom Scripts -->
+    <script src="pulseq.js"></script>
     <script src="bloch.js"></script>
     <script src="app.js"></script>
 </body>

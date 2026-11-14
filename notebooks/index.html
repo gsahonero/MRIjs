@@ -68,37 +68,43 @@
     <!-- MODALITY 1: LIVE SCIENCE DOCUMENT / COMPUTATIONAL PAPER            -->
     <!-- =================================================================== -->
     <div id="viewPaper">
-        <!-- Floating Section Outline (Scroll-Spy) -->
-        <aside class="floating-paper-outline" id="floatingOutline" aria-label="Table of Contents">
-            <div class="outline-header">
-                <i data-lucide="compass" style="width:13px;height:13px;"></i>
-                <span data-i18n="outline_title">Document Outline</span>
-            </div>
-            <nav class="outline-nav">
-                <a href="#sec1" class="outline-link active" data-target="sec1">
-                    <span class="outline-badge">§1</span>
-                    <span class="outline-text" data-i18n="outline_sec1">§1 B₀ Field & Precession</span>
-                </a>
-                <a href="#sec2" class="outline-link" data-target="sec2">
-                    <span class="outline-badge">§2</span>
-                    <span class="outline-text" data-i18n="outline_sec2">§2 Gradient Spatial Encoding</span>
-                </a>
-                <a href="#sec3" class="outline-link" data-target="sec3">
-                    <span class="outline-badge">§3</span>
-                    <span class="outline-text" data-i18n="outline_sec3">§3 RF Pulses & B₁ Nutation</span>
-                </a>
-                <a href="#sec4" class="outline-link" data-target="sec4">
-                    <span class="outline-badge">§4</span>
-                    <span class="outline-text" data-i18n="outline_sec4">§4 k-Space & Reconstruction</span>
-                </a>
-                <a href="#sec5" class="outline-link" data-target="sec5">
-                    <span class="outline-badge">§5</span>
-                    <span class="outline-text" data-i18n="outline_sec5">§5 References</span>
-                </a>
-            </nav>
-        </aside>
+        <div class="paper-layout-container">
+            <!-- Floating / Sticky Section Outline (Scroll-Spy) -->
+            <aside class="floating-paper-outline" id="floatingOutline" aria-label="Table of Contents">
+                <div class="outline-header">
+                    <div class="outline-header-title">
+                        <i data-lucide="compass" style="width:13px;height:13px;"></i>
+                        <span data-i18n="outline_title">Document Outline</span>
+                    </div>
+                    <button id="btnToggleOutline" class="outline-collapse-btn" title="Collapse / Expand Outline" aria-label="Collapse outline">
+                        <i data-lucide="chevron-left" style="width:13px;height:13px;"></i>
+                    </button>
+                </div>
+                <nav class="outline-nav">
+                    <a href="#sec1" class="outline-link active" data-target="sec1" title="§1 B₀ Field & Precession">
+                        <span class="outline-badge">§1</span>
+                        <span class="outline-text" data-i18n="outline_sec1">§1 B₀ Field & Precession</span>
+                    </a>
+                    <a href="#sec2" class="outline-link" data-target="sec2" title="§2 Gradient Spatial Encoding">
+                        <span class="outline-badge">§2</span>
+                        <span class="outline-text" data-i18n="outline_sec2">§2 Gradient Spatial Encoding</span>
+                    </a>
+                    <a href="#sec3" class="outline-link" data-target="sec3" title="§3 RF Pulses & B₁ Nutation">
+                        <span class="outline-badge">§3</span>
+                        <span class="outline-text" data-i18n="outline_sec3">§3 RF Pulses & B₁ Nutation</span>
+                    </a>
+                    <a href="#sec4" class="outline-link" data-target="sec4" title="§4 k-Space & Reconstruction">
+                        <span class="outline-badge">§4</span>
+                        <span class="outline-text" data-i18n="outline_sec4">§4 k-Space & Reconstruction</span>
+                    </a>
+                    <a href="#sec5" class="outline-link" data-target="sec5" title="§5 References">
+                        <span class="outline-badge">§5</span>
+                        <span class="outline-text" data-i18n="outline_sec5">§5 References</span>
+                    </a>
+                </nav>
+            </aside>
 
-        <article class="paper-wrapper">
+            <article class="paper-wrapper">
             
             <!-- Masthead -->
             <header class="paper-masthead">
@@ -779,6 +785,7 @@
             </footer>
 
         </article>
+        </div>
     </div>
 
     <!-- =================================================================== -->

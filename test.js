@@ -163,6 +163,83 @@ try {
     console.error(`  ${colors.red}Error in Test case 3:${colors.reset} ${e.stack}`);
     testsFailed++;
 }
+console.log();
+
+// ----------------------------------------------------
+// Test 4: Pulseq Import, Shape Decompression & Simulation
+// ----------------------------------------------------
+console.log(`${colors.bold}Test Case 4: Pulseq (.seq) Import, Shape Decompression & Simulation${colors.reset}`);
+try {
+    const { PulseqParser, PulseqSequence, decompressPulseqShape, compressPulseqShape } = require('./pulseq.js');
+
+    // 4.1 Test Shape Run-Length Derivative Compression & Decompression
+    const rawWaveform = new Array(100).fill(0.0);
+    for (let i = 20; i < 80; i++) rawWaveform[i] = 1.0;
+    const compressed = compressPulseqShape(rawWaveform);
+    const decompressed = decompressPulseqShape(compressed, rawWaveform.length);
+    
+    let shapeMatch = compressed.length < rawWaveform.length;
+    for (let i = 0; i < rawWaveform.length; i++) {
+        if (Math.abs(rawWaveform[i] - decompressed[i]) > 1e-5) shapeMatch = false;
+    }
+    assert(shapeMatch, `Pulseq derivative run-length shape decompression reconstructs exact waveform (100 samples -> ${compressed.length} compressed)`);
+
+    // 4.2 Test Pulseq FID Import & Bloch Simulation
+    const fidText = PulseqSequence.createSampleFid(90, 200);
+    const fidSeq = PulseqParser.parse(fidText);
+    assert(fidSeq.blocks.length === 2 && fidSeq.rfEvents.length === 1, `Pulseq FID parser extracts blocks and RF event correctly`);
+
+    const singleSpin = [{ id: 'p_fid', x: 0, T1: 1000, T2: 100, PD: 1.0, w: 0 }];
+    const simFid = new BlochSimulator(singleSpin, 200, 0.2, 'rotating', 'PULSEQ', { pulseqSequence: fidSeq });
+    const resFid = simFid.run();
+
+    const stepRfEnd = Math.round(2.0 / 0.2);
+    const mxyPostRf = resFid.signals[stepRfEnd].Mxy;
+    const mzPostRf = resFid.signals[stepRfEnd].Mz;
+
+    assert(mxyPostRf > 0.97, `Pulseq FID excitation tips transverse magnetization to >97% (actual: ${(mxyPostRf*100).toFixed(1)}%)`);
+    assert(mzPostRf < 0.02, `Pulseq FID excitation flips Mz close to zero (actual: ${mzPostRf.toFixed(4)})`);
+
+    // 4.3 Test Pulseq GRE Gradient Echo formation
+    const greText = PulseqSequence.createSampleGRE(90, 40, 100);
+    const greSeq = PulseqParser.parse(greText);
+    const greSpins = [
+        { id: 'p_gre_1', x: -1.0, T1: 1000, T2: 200, PD: 1.0, w: 0 },
+        { id: 'p_gre_2', x: 1.0, T1: 1000, T2: 200, PD: 1.0, w: 0 }
+    ];
+    const simGre = new BlochSimulator(greSpins, 80, 0.2, 'rotating', 'PULSEQ', { pulseqSequence: greSeq });
+    const resGre = simGre.run();
+
+    const stepDephased = Math.round(11.0 / 0.2);
+    const stepEcho = Math.round(40.0 / 0.2);
+    const mxyDephased = resGre.signals[stepDephased].Mxy;
+    const mxyEcho = resGre.signals[stepEcho].Mxy;
+
+    assert(mxyDephased < 0.20, `Pulseq GRE dephases spins under dephasing gradient lobe (Mxy: ${mxyDephased.toFixed(4)})`);
+    assert(mxyEcho > mxyDephased && mxyEcho > 0.80, `Pulseq GRE rephases spins to form an echo at TE=40ms (Echo: ${mxyEcho.toFixed(4)})`);
+
+    // 4.4 Test Pulseq Spin Echo (SE) Refocusing
+    const seText = PulseqSequence.createSampleSE(60, 150);
+    const seSeq = PulseqParser.parse(seText);
+    const seSpins = [
+        { id: 'p_se_1', x: 0, T1: 1000, T2: 200, PD: 1.0, w: -25.0 },
+        { id: 'p_se_2', x: 0, T1: 1000, T2: 200, PD: 1.0, w: 25.0 }
+    ];
+    const simSe = new BlochSimulator(seSpins, 100, 0.2, 'rotating', 'PULSEQ', { pulseqSequence: seSeq });
+    const resSe = simSe.run();
+
+    const stepEchoSe = Math.round(60.0 / 0.2);
+    const mxyEchoSe = resSe.signals[stepEchoSe].Mxy;
+    const stepBeforeSe = Math.round(57.0 / 0.2);
+    const stepAfterSe = Math.round(63.0 / 0.2);
+
+    assert(mxyEchoSe > resSe.signals[stepBeforeSe].Mxy && mxyEchoSe > resSe.signals[stepAfterSe].Mxy,
+        `Pulseq SE 180° refocusing pulse generates echo peak at TE=60ms (Echo: ${mxyEchoSe.toFixed(4)})`);
+
+} catch (e) {
+    console.error(`  ${colors.red}Error in Test case 4:${colors.reset} ${e.stack}`);
+    testsFailed++;
+}
 
 console.log(`\n${colors.bold}===============================================`);
 console.log(`Test Run Completed:`);

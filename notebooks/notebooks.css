@@ -199,26 +199,64 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
-/* FLOATING ACADEMIC PAPER OUTLINE (Table of Contents Sidebar)       */
+/* FLOATING ACADEMIC PAPER OUTLINE & FLEX LAYOUT                      */
 /* ------------------------------------------------------------------ */
+
+.paper-layout-container {
+    max-width: 1220px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2.25rem;
+    padding: 0 1.5rem;
+    position: relative;
+    box-sizing: border-box;
+}
+
 .floating-paper-outline {
-    position: fixed;
-    top: 90px;
-    left: max(0.75rem, calc(50% - 630px));
-    width: 200px;
-    background: rgba(13, 17, 27, 0.90);
+    position: sticky;
+    top: 85px;
+    width: 210px;
+    min-width: 210px;
+    max-width: 210px;
+    background: rgba(13, 17, 27, 0.92);
     backdrop-filter: blur(16px);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 0.85rem 0.75rem;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(59, 130, 246, 0.08);
-    z-index: 100;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 90;
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s ease;
+    margin-top: 2.5rem;
+    flex-shrink: 0;
+}
+
+.floating-paper-outline.collapsed {
+    width: 52px;
+    min-width: 52px;
+    max-width: 52px;
+    padding: 0.85rem 0.35rem;
+}
+
+.floating-paper-outline.collapsed .outline-header-title span,
+.floating-paper-outline.collapsed .outline-text {
+    display: none;
+}
+
+.floating-paper-outline.collapsed .outline-link {
+    justify-content: center;
+    padding: 0.5rem 0;
+}
+
+.floating-paper-outline.collapsed .outline-collapse-btn i {
+    transform: rotate(180deg);
 }
 
 .outline-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.45rem;
     font-size: 0.7rem;
     font-weight: 700;
@@ -229,6 +267,33 @@ body {
     border-bottom: 1px solid var(--border-color);
     margin-bottom: 0.5rem;
     font-family: var(--font-display);
+}
+
+.outline-header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.outline-collapse-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.outline-collapse-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--border-color);
 }
 
 .outline-nav {
@@ -289,21 +354,29 @@ body {
     outline-offset: 1px;
 }
 
-/* Hide floating sidebar on screens under 1260px where it would overlap paper body */
-@media (max-width: 1260px) {
-    .floating-paper-outline {
-        display: none;
-    }
-}
-
 /* ------------------------------------------------------------------ */
 /* LIVE SCIENCE DOCUMENT / COMPUTATIONAL PAPER STYLING (Distill style)*/
 /* ------------------------------------------------------------------ */
 
 .paper-wrapper {
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 3rem 2rem 6rem 2rem;
+    flex: 1;
+    min-width: 0;
+    max-width: 920px;
+    margin: 0;
+    padding: 2.5rem 0 6rem 0;
+}
+
+@media (max-width: 1080px) {
+    .floating-paper-outline {
+        display: none;
+    }
+    .paper-layout-container {
+        padding: 0 1rem;
+    }
+    .paper-wrapper {
+        max-width: 100%;
+        padding: 1.5rem 0 4rem 0;
+    }
 }
 
 /* Masthead / Header */

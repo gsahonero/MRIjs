@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSharedInteractions();
     initCheckpoints();
     initScrollSpy();
+    initOutlineToggle();
 
     // Check URL parameters, hash, or standalone slides page
     const params = new URLSearchParams(window.location.search);
@@ -1730,4 +1731,17 @@ function initScrollSpy() {
     });
 
     sections.forEach(sec => observer.observe(sec));
+}
+
+function initOutlineToggle() {
+    const btn = document.getElementById('btnToggleOutline');
+    const outline = document.getElementById('floatingOutline');
+    if (!btn || !outline) return;
+
+    btn.addEventListener('click', () => {
+        outline.classList.toggle('collapsed');
+        const isCollapsed = outline.classList.contains('collapsed');
+        btn.setAttribute('aria-expanded', !isCollapsed);
+        if (window.lucide) lucide.createIcons();
+    });
 }

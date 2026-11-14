@@ -568,3 +568,21 @@ dialog .actions {
     padding: 0.35rem 0.5rem !important;
     font-size: 0.75rem !important;
 }
+
+/* Pulseq Integration Styles */
+#pulseqDropZone:hover {
+    border-color: #38bdf8 !important;
+    background: rgba(56, 189, 248, 0.08) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.1);
+}
+
+#pulseqDropZone:active {
+    transform: translateY(0);
+}
+
+#pulseqDropZone.dragover {
+    border-color: #38bdf8 !important;
+    background: rgba(56, 189, 248, 0.15) !important;
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
+}

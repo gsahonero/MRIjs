@@ -9,8 +9,9 @@ class BlochSimulator {
         this.simulationTime = simulationTimeMs / 1000.0; // convert to seconds
         this.dt = dtMs / 1000.0; // convert to seconds
         this.frameType = frameType; // 'lab' or 'rotating'
-        this.scenario = scenario; // 'FID', 'GRE', 'SE'
-        this.params = params; // Scenario-specific params: flipAngle, TE, TR
+        this.scenario = scenario; // 'FID', 'GRE', 'SE', 'PULSEQ'
+        this.params = params || {}; // Scenario-specific params: flipAngle, TE, TR, pulseqSequence
+        this.pulseqSequence = this.params.pulseqSequence || null;
 
         // Visual base frequency for Lab Frame (e.g., 2.0 Hz so precession is clearly visible)
         this.f0 = 2.0; 
@@ -55,6 +56,20 @@ class BlochSimulator {
         let omegaX = 0.0;
         let omegaY = 0.0;
         let G = 0.0;
+        let isAdc = false;
+        let rfMag = 0.0;
+
+        if (this.scenario === 'PULSEQ') {
+            if (this.pulseqSequence) {
+                const state = this.pulseqSequence.getStateAt(t);
+                omegaX = state.omegaX;
+                omegaY = state.omegaY;
+                G = state.G;
+                isAdc = state.isAdc;
+                rfMag = state.rfMag;
+            }
+            return { omegaX, omegaY, G, isAdc, rfMag };
+        }
 
         let TR = (this.params.TR || 1000) / 1000.0; // to seconds
         let TE = (this.params.TE || 100) / 1000.0; // to seconds
@@ -143,18 +158,20 @@ class BlochSimulator {
         const spinHistory = [];
         const sequenceRF = [];
         const sequenceGrad = [];
+        const sequenceADC = [];
 
         for (let step = 0; step <= numSteps; step++) {
             const t = step * this.dt;
             timeSteps.push(t * 1000.0); // store in ms
 
             // Get RF and Gradient at current time
-            const { omegaX, omegaY, G } = this.getSequenceState(t);
+            const { omegaX, omegaY, G, isAdc } = this.getSequenceState(t);
             
             // Record sequence envelope magnitude (rad/s) and Gradient G (rad/s/unit)
             const rfMag = Math.sqrt(omegaX * omegaX + omegaY * omegaY);
             sequenceRF.push(rfMag);
             sequenceGrad.push(G);
+            sequenceADC.push(isAdc ? 1.0 : 0.0);
 
             // Record current spin states
             const currentStepStates = spins.map(spin => [...spin.M]);
@@ -218,7 +235,8 @@ class BlochSimulator {
             signals,
             spinHistory,
             sequenceRF,
-            sequenceGrad
+            sequenceGrad,
+            sequenceADC
         };
     }
 }

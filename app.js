@@ -10,6 +10,9 @@ let lastFrameTime = 0.0;
 let selectedSpinId = null;
 let currentSimTime = 300.0;
 let currentSphereRadius = 0.08;
+let activePulseqSequence = null;
+let activePulseqRawText = '';
+let pulseqGradScale = 1.0;
 
 // Three.js variables
 let scene, camera, renderer, controls;
@@ -315,6 +318,17 @@ function initChart() {
                     tension: 0.1,
                     fill: 'origin',
                     backgroundColor: 'rgba(245, 158, 11, 0.05)'
+                },
+                {
+                    label: 'ADC Readout',
+                    borderColor: '#06b6d4', // cyan
+                    borderWidth: 1.5,
+                    borderDash: [4, 4],
+                    pointRadius: 0,
+                    data: [],
+                    tension: 0,
+                    fill: 'origin',
+                    backgroundColor: 'rgba(6, 182, 212, 0.15)'
                 }
             ]
         },
@@ -439,22 +453,36 @@ function setupEventListeners() {
         const teTrRow = document.getElementById('paramTeTrRow');
         const teGroup = document.getElementById('paramTeGroup');
         const trGroup = document.getElementById('paramTrGroup');
+        const pulseqCard = document.getElementById('pulseqControlCard');
         
         if (scenario === 'FID') {
+            if (pulseqCard) pulseqCard.style.display = 'none';
             document.getElementById('paramFlipGroup').style.display = 'flex';
             if (teGroup) teGroup.style.display = 'none';
             if (trGroup) trGroup.style.display = 'flex';
             if (teTrRow) teTrRow.style.gridTemplateColumns = '1fr';
         } else if (scenario === 'GRE') {
+            if (pulseqCard) pulseqCard.style.display = 'none';
             document.getElementById('paramFlipGroup').style.display = 'flex';
             if (teGroup) teGroup.style.display = 'flex';
             if (trGroup) trGroup.style.display = 'flex';
             if (teTrRow) teTrRow.style.gridTemplateColumns = '1fr 1fr';
         } else if (scenario === 'SE') {
+            if (pulseqCard) pulseqCard.style.display = 'none';
             document.getElementById('paramFlipGroup').style.display = 'none';
             if (teGroup) teGroup.style.display = 'flex';
             if (trGroup) trGroup.style.display = 'flex';
             if (teTrRow) teTrRow.style.gridTemplateColumns = '1fr 1fr';
+        } else if (scenario === 'PULSEQ') {
+            if (pulseqCard) pulseqCard.style.display = 'block';
+            document.getElementById('paramFlipGroup').style.display = 'none';
+            if (teGroup) teGroup.style.display = 'none';
+            if (trGroup) trGroup.style.display = 'none';
+            if (!activePulseqSequence) {
+                const presetVal = document.getElementById('pulseqPresetSelect')?.value || 'FID';
+                loadPulseqPreset(presetVal);
+                return;
+            }
         }
         
         runSimulation();
@@ -479,6 +507,77 @@ function setupEventListeners() {
 
     // Initialize accessible dropdown menus
     initTopMenus();
+
+    // File -> Import Pulseq (.seq)
+    const menuImportPulseq = document.getElementById('menuImportPulseq');
+    if (menuImportPulseq) {
+        menuImportPulseq.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeAllMenus();
+            const pulseqInput = document.getElementById('pulseqFileInput');
+            if (pulseqInput) pulseqInput.click();
+        });
+    }
+
+    // Pulseq File Input Loader
+    const pulseqFileInput = document.getElementById('pulseqFileInput');
+    if (pulseqFileInput) {
+        pulseqFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                readAndLoadPulseqFile(file);
+            }
+            e.target.value = '';
+        });
+    }
+
+    // Pulseq Drop Zone
+    const pulseqDropZone = document.getElementById('pulseqDropZone');
+    if (pulseqDropZone) {
+        pulseqDropZone.addEventListener('click', () => {
+            const pulseqInput = document.getElementById('pulseqFileInput');
+            if (pulseqInput) pulseqInput.click();
+        });
+
+        pulseqDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            pulseqDropZone.style.borderColor = '#38bdf8';
+            pulseqDropZone.style.background = 'rgba(56, 189, 248, 0.12)';
+        });
+
+        pulseqDropZone.addEventListener('dragleave', () => {
+            pulseqDropZone.style.borderColor = 'rgba(56, 189, 248, 0.35)';
+            pulseqDropZone.style.background = 'rgba(56, 189, 248, 0.04)';
+        });
+
+        pulseqDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            pulseqDropZone.style.borderColor = 'rgba(56, 189, 248, 0.35)';
+            pulseqDropZone.style.background = 'rgba(56, 189, 248, 0.04)';
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                readAndLoadPulseqFile(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    // Pulseq Preset Selector
+    const pulseqPresetSelect = document.getElementById('pulseqPresetSelect');
+    if (pulseqPresetSelect) {
+        pulseqPresetSelect.addEventListener('change', (e) => {
+            loadPulseqPreset(e.target.value);
+        });
+    }
+
+    // Pulseq Gradient Scale Slider
+    const pulseqGradSlider = document.getElementById('pulseqGradScaleSlider');
+    const pulseqGradVal = document.getElementById('pulseqGradScaleVal');
+    if (pulseqGradSlider && pulseqGradVal) {
+        pulseqGradSlider.addEventListener('input', (e) => {
+            pulseqGradScale = parseFloat(e.target.value) || 1.0;
+            pulseqGradVal.innerText = pulseqGradScale.toFixed(1) + 'x';
+            runSimulation();
+        });
+    }
 
     // Top Dropdown Menu Listeners
     // File -> Save Experiment
@@ -1116,7 +1215,20 @@ function runSimulation() {
 
     // Run simulation
     const dt = 0.2; // 0.2 ms simulation resolution for high-performance JS computation
-    const simulator = new BlochSimulator(isochromats, currentSimTime, dt, frame, scenario, { flipAngle, TE, TR });
+    const simulator = new BlochSimulator(
+        isochromats,
+        currentSimTime,
+        dt,
+        frame,
+        scenario,
+        {
+            flipAngle,
+            TE,
+            TR,
+            pulseqSequence: scenario === 'PULSEQ' ? activePulseqSequence : null,
+            gradScale: pulseqGradScale
+        }
+    );
     simResults = simulator.run();
 
     // Reset animation state
@@ -1137,11 +1249,12 @@ function updateChartData() {
     const mzData = [];
     const rfData = [];
     const gradData = [];
+    const adcData = [];
 
     // Find max RF magnitude for normalization
     const maxRF = Math.max(...simResults.sequenceRF, 1.0); // prevent divide by zero
     // Find max gradient magnitude for normalization
-    const maxGrad = 2 * Math.PI * 30.0;
+    const maxGrad = Math.max(...simResults.sequenceGrad.map(Math.abs), 2 * Math.PI * 30.0);
 
     // Decimate data points slightly for Chart.js drawing speed (max 600 points)
     const stride = Math.max(1, Math.floor(simResults.signals.length / 500));
@@ -1150,12 +1263,14 @@ function updateChartData() {
         const pt = simResults.signals[i];
         const rfVal = simResults.sequenceRF[i] / maxRF;
         const gradVal = simResults.sequenceGrad[i] / maxGrad;
+        const adcVal = (simResults.sequenceADC && simResults.sequenceADC[i]) ? 0.8 : 0.0;
 
         dataLabels.push(pt.t); // in ms
         mxyData.push({ x: pt.t, y: pt.Mxy });
         mzData.push({ x: pt.t, y: pt.Mz });
         rfData.push({ x: pt.t, y: rfVal });
         gradData.push({ x: pt.t, y: gradVal });
+        adcData.push({ x: pt.t, y: adcVal });
     }
 
     // Always include final point
@@ -1163,12 +1278,14 @@ function updateChartData() {
     const finalPt = simResults.signals[finalIdx];
     const finalRfVal = simResults.sequenceRF[finalIdx] / maxRF;
     const finalGradVal = simResults.sequenceGrad[finalIdx] / maxGrad;
+    const finalAdcVal = (simResults.sequenceADC && simResults.sequenceADC[finalIdx]) ? 0.8 : 0.0;
 
     dataLabels.push(finalPt.t);
     mxyData.push({ x: finalPt.t, y: finalPt.Mxy });
     mzData.push({ x: finalPt.t, y: finalPt.Mz });
     rfData.push({ x: finalPt.t, y: finalRfVal });
     gradData.push({ x: finalPt.t, y: finalGradVal });
+    adcData.push({ x: finalPt.t, y: finalAdcVal });
 
     // Update signal chart
     signalChart.data.datasets[0].data = mxyData;
@@ -1180,6 +1297,9 @@ function updateChartData() {
     // Update sequence chart
     sequenceChart.data.datasets[0].data = rfData;
     sequenceChart.data.datasets[1].data = gradData;
+    if (sequenceChart.data.datasets.length > 2) {
+        sequenceChart.data.datasets[2].data = adcData;
+    }
     sequenceChart.options.scales.x.max = currentSimTime;
     sequenceChart.options.scales.x.min = 0;
     sequenceChart.update();
@@ -1373,6 +1493,132 @@ function runPhysicsTests() {
     } catch (e) {
         setRowState('testSeRow', 'failing', 'ERROR: ' + e.message);
     }
+
+    // 4. Pulseq Import & Simulation Test
+    try {
+        if (typeof Pulseq !== 'undefined') {
+            const sampleGreText = Pulseq.PulseqSequence.createSampleGRE(90, 40, 100);
+            const pSeq = Pulseq.PulseqParser.parse(sampleGreText);
+            const pSpins = [
+                { id: 'test_p_1', x: -1.0, T1: 1000, T2: 200, PD: 1.0, w: 0 },
+                { id: 'test_p_2', x: 1.0, T1: 1000, T2: 200, PD: 1.0, w: 0 }
+            ];
+            const pSim = new BlochSimulator(pSpins, 80, 0.2, 'rotating', 'PULSEQ', { pulseqSequence: pSeq });
+            const pRes = pSim.run();
+
+            const pStepDephase = Math.round(11.0 / 0.2); // 11 ms
+            const pStepEcho = Math.round(40.0 / 0.2);    // TE = 40 ms
+
+            const pMxyDephase = pRes.signals[pStepDephase].Mxy;
+            const pMxyEcho = pRes.signals[pStepEcho].Mxy;
+
+            const pDephasedOk = pMxyDephase < 0.20;
+            const pEchoOk = pMxyEcho > 0.75 && pMxyEcho > pMxyDephase;
+
+            if (pDephasedOk && pEchoOk) {
+                setRowState('testPulseqRow', 'passing', `PASSED (Parsed v1.4, dephased to ${pMxyDephase.toFixed(2)}, rephased to ${pMxyEcho.toFixed(2)})`);
+            } else {
+                setRowState('testPulseqRow', 'failing', `FAILED (Dephase: ${pMxyDephase.toFixed(2)}, Echo: ${pMxyEcho.toFixed(2)})`);
+            }
+        }
+    } catch (e) {
+        setRowState('testPulseqRow', 'failing', 'ERROR: ' + e.message);
+    }
+}
+
+// -------------------------------------------------------------
+// Pulseq File Import & Sequence Management
+// -------------------------------------------------------------
+function readAndLoadPulseqFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        try {
+            const seqText = event.target.result;
+            importPulseqText(seqText, file.name);
+        } catch (err) {
+            alert('Error loading Pulseq sequence: ' + err.message);
+        }
+    };
+    reader.readAsText(file);
+}
+
+function importPulseqText(seqText, fileName = 'sequence.seq') {
+    if (typeof Pulseq === 'undefined') {
+        alert('Pulseq engine not loaded.');
+        return;
+    }
+
+    try {
+        const seq = Pulseq.PulseqParser.parse(seqText);
+        activePulseqSequence = seq;
+        activePulseqRawText = seqText;
+
+        // Switch scenario to PULSEQ in UI
+        const scenarioSelect = document.getElementById('scenarioSelect');
+        if (scenarioSelect && scenarioSelect.value !== 'PULSEQ') {
+            scenarioSelect.value = 'PULSEQ';
+            scenarioSelect.dispatchEvent(new Event('change'));
+        }
+
+        // Update metadata card
+        updatePulseqSummary(seq, fileName);
+
+        // Adjust simulation time to match sequence duration if sensible
+        if (seq.totalDuration > 0) {
+            const durMs = Math.ceil(seq.totalDuration * 1000.0);
+            const simInput = document.getElementById('simTimeInput');
+            if (simInput) {
+                simInput.value = durMs;
+                currentSimTime = durMs;
+            }
+        }
+
+        // Run simulation immediately
+        runSimulation();
+        console.log(`Pulseq sequence "${seq.name}" (${fileName}) loaded and simulated successfully.`);
+    } catch (err) {
+        console.error('Pulseq parse error:', err);
+        alert('Failed to parse Pulseq file: ' + err.message);
+    }
+}
+
+function updatePulseqSummary(seq, fileName) {
+    const summary = seq.getSummary();
+    const versionBadge = document.getElementById('pulseqVersionBadge');
+    if (versionBadge) versionBadge.innerText = 'v' + summary.version;
+
+    const nameEl = document.getElementById('pulseqMetaName');
+    if (nameEl) nameEl.innerText = seq.name || fileName;
+
+    const durEl = document.getElementById('pulseqMetaDuration');
+    if (durEl) durEl.innerText = summary.totalDurationMs.toFixed(1) + ' ms';
+
+    const blkEl = document.getElementById('pulseqMetaBlocks');
+    if (blkEl) {
+        blkEl.innerText = `${summary.numBlocks} blk (${summary.numRfPulses} RF, ${summary.numGradients} G, ${summary.numAdcReadouts} ADC)`;
+    }
+}
+
+function loadPulseqPreset(presetKey) {
+    if (typeof Pulseq === 'undefined') return;
+
+    let seqText = '';
+    let fileName = `preset_${presetKey.toLowerCase()}.seq`;
+
+    if (presetKey === 'FID') {
+        seqText = Pulseq.PulseqSequence.createSampleFid(90, 200);
+    } else if (presetKey === 'GRE') {
+        seqText = Pulseq.PulseqSequence.createSampleGRE(90, 40, 100);
+    } else if (presetKey === 'SE') {
+        seqText = Pulseq.PulseqSequence.createSampleSE(60, 150);
+    } else if (presetKey === 'SINC') {
+        seqText = Pulseq.PulseqSequence.createSampleSinc(90, 150);
+    }
+
+    if (seqText) {
+        importPulseqText(seqText, fileName);
+    }
 }
 
 // Save experiment parameters and spins array to JSON
@@ -1385,7 +1631,9 @@ function saveExperiment() {
         flipAngle: parseFloat(document.getElementById('flipAngleInput').value) || 90,
         TE: parseFloat(document.getElementById('teInput').value) || 60,
         TR: parseFloat(document.getElementById('trInput').value) || 250,
-        sphereRadius: currentSphereRadius
+        sphereRadius: currentSphereRadius,
+        pulseqSeqText: activePulseqRawText || '',
+        pulseqGradScale: pulseqGradScale
     };
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1429,6 +1677,24 @@ function loadExperiment(e) {
             if (data.flipAngle) document.getElementById('flipAngleInput').value = data.flipAngle;
             if (data.TE) document.getElementById('teInput').value = data.TE;
             if (data.TR) document.getElementById('trInput').value = data.TR;
+
+            // Restore Pulseq sequence if present
+            if (data.pulseqGradScale) {
+                pulseqGradScale = data.pulseqGradScale;
+                const scaleSlider = document.getElementById('pulseqGradScaleSlider');
+                const scaleVal = document.getElementById('pulseqGradScaleVal');
+                if (scaleSlider) scaleSlider.value = pulseqGradScale;
+                if (scaleVal) scaleVal.innerText = pulseqGradScale.toFixed(1) + 'x';
+            }
+            if (data.scenario === 'PULSEQ' && data.pulseqSeqText && typeof Pulseq !== 'undefined') {
+                try {
+                    activePulseqSequence = Pulseq.PulseqParser.parse(data.pulseqSeqText);
+                    activePulseqRawText = data.pulseqSeqText;
+                    updatePulseqSummary(activePulseqSequence, 'saved_experiment.seq');
+                } catch (e) {
+                    console.warn('Could not restore saved Pulseq sequence:', e);
+                }
+            }
 
             // Trigger change event to update UI display toggles
             document.getElementById('scenarioSelect').dispatchEvent(new Event('change'));

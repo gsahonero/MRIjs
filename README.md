@@ -48,6 +48,18 @@ You can switch between modalities with one click using the top toggle bar in [`n
 
 ---
 
+## ⚡ Pulseq Open File Format Compatibility (.seq)
+
+MRIjs natively supports the vendor-neutral **Pulseq open standard** (`.seq`, versions 1.2.x through 1.5.x):
+
+- **Full Format Parsing**: Reads `[VERSION]`, `[DEFINITIONS]`, `[BLOCKS]`, `[RF]`, `[TRAP]`, `[GRADIENTS]`, `[ADC]`, `[DELAYS]`, and `[SHAPES]`.
+- **Waveform Shape Decompression**: Reconstructs compressed RF and gradient shapes encoded with run-length compression on the first derivative.
+- **Continuous Bloch Simulation**: Evaluates instantaneous RF rotation rate $\vec{\omega}_1(t) = 2\pi B_1(t)$ and spatial gradient field $G_x(t)$, solving spin precession, dephasing, rephasing, and refocusing across all active isochromats.
+- **ADC Readout Tracking**: Highlights acquisition windows and records complex transverse magnetization.
+- **Import Field & Drag-and-Drop**: Easily import custom `.seq` files from the top **File → Import Pulseq (.seq)** menu or via the dedicated drag-and-drop zone in the left panel. Built-in presets (FID, Gradient Echo, Spin Echo, Apodized Sinc) are included for instant exploration.
+
+---
+
 ## 🚀 Getting Started
 
 No build step or Node compilation required. MRIjs runs directly in any modern web browser:
